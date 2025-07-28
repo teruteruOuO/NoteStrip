@@ -5,7 +5,7 @@ Resources:
   VPC:
     Type: 'AWS::EC2::VPC'
     Properties:
-      CidrBlock: '10.0.0.0/22'
+      CidrBlock: '10.0.0.0/16'
       EnableDnsSupport: true      # Allows DNS resolution inside the VPC
       EnableDnsHostnames: true    # Assigns DNS hostnames to instances
   
@@ -501,7 +501,6 @@ Resources:
       InstanceProfileName: EC2InstanceProfile 
       Roles:
         - !Ref EC2InstanceRole
-  # Note: Attach !Ref EC2InstanceProfile to EC2 resource under IamInstanceProfile.
 
 
   ## S3
@@ -605,3 +604,121 @@ Resources:
       Tags:
         - Key: Name
           Value: NoteStripDatabase
+
+  
+  ## Launch Template
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: NoteStripLaunchTemplate
+      LaunchTemplateData:
+        ImageId: ami-0abcdef1234567890   # Use region-specific AMI (e.g., Amazon Linux 2)
+        InstanceType: t3.micro
+        SecurityGroupIds:
+          - !Ref EC2SecurityGroup
+        IamInstanceProfile:
+          Arn: !GetAtt EC2InstanceProfile.Arn
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda        # Root volume name (default for Amazon Linux)
+            Ebs:
+              VolumeSize: 30             # 30GB EBS volume
+              VolumeType: gp3            # gp3 (recommended over gp2)
+              DeleteOnTermination: true  # Automatically delete when instance is terminated
+              Encrypted: true            # Encrypt the EBS volume
+        UserData: !Base64 |
+          #!/bin/bash
+          yum update -y
+          yum install -y nodejs git
+          # Example: pull your app code and start
+          cd /home/ec2-user
+          git clone https://github.com/your-repo.git
+          cd your-repo
+          npm install
+          npm run start
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: NoteStripAppServer
+          - ResourceType: volume
+            Tags:
+              - Key: Name
+                Value: NoteStripAppVolume
+
+  
+  ## Auto Scaling Group
+  # Manages the EC2 fleet dynamically.
+  # Uses Launch Template to create instances.
+  # Health checks via ALB ensure only healthy instances receive traffic.
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: NoteStripASG               # Name for the Auto Scaling Group (appears in AWS console).
+      MinSize: 1                                      # Minimum number of EC2 instances that must always be running.
+      MaxSize: 2                                      # Maximum number of EC2 instances the ASG can scale out to.
+      DesiredCapacity: 1                               # Initial number of EC2 instances to launch when the stack is created.
+      VPCZoneIdentifier:
+        - !Ref SubnetEC2                               # Private subnet where EC2 instances will be launched.
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate          # References the previously defined Launch Template for EC2 configuration.
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber  # Uses the latest version of the Launch Template.
+      TargetGroupARNs:
+        - !Ref AppTargetGroup                          # Registers instances with the ALB Target Group for load balancing.
+      HealthCheckType: ELB                             # Uses the ALB health checks to determine if instances are healthy.
+      HealthCheckGracePeriod: 300                      # Waits 300 seconds (5 min) after launching before checking health status.
+      Tags:
+        - Key: Name
+          Value: NoteStripAppInstance                  # Tag applied to each instance created by the ASG.
+          PropagateAtLaunch: true                      # Ensures the tag is automatically added to all launched EC2 instances.
+
+  
+  ## Load Balancer
+  # Target Group: A logical grouping of EC2 instances behind the ALB. 
+  # The ALB sends traffic to healthy instances in this group.
+  # Only listen to HTTP for now because there's no certificate yet
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VPC          
+      Name: NoteStripTargetGroup        # Human-readable name for the Target Group.
+      Protocol: HTTP                    # Protocol the ALB uses to route traffic to instances (HTTP).
+      Port: 80                          # Port on the EC2 instances that will receive traffic (typically 80 for web apps).
+      TargetType: instance               # Target is individual EC2 instances (not IPs or Lambda functions).
+      HealthCheckProtocol: HTTP          # Protocol used by the ALB to check the health of instances.
+      HealthCheckPath: /                 # URL path for health checks; ALB sends requests to `http://instance-ip/`.
+      HealthCheckIntervalSeconds: 30     # Time (in seconds) between consecutive health checks.
+      HealthCheckTimeoutSeconds: 5       # Time to wait for a health check response before marking it failed.
+      HealthyThresholdCount: 2           # Number of consecutive successful health checks before marking the instance healthy.
+      UnhealthyThresholdCount: 5         # Number of consecutive failed health checks before marking the instance unhealthy.
+      Tags:
+        - Key: Name                 
+          Value: NoteStripTargetGroup
+
+  # Application Load Balancer: Distributes incoming traffic from the internet to instances in private subnets.
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: NoteStripALB                   # Name for the ALB (appears in AWS console).
+      Scheme: internet-facing              # Makes the ALB public-facing with an external IP and DNS name.
+      Type: application                    # Defines it as an Application Load Balancer (HTTP/HTTPS layer 7 routing).
+      SecurityGroups:
+        - !Ref ALBSecurityGroup             # Security group allowing inbound HTTP/HTTPS traffic to the ALB.
+      Subnets:
+        - !Ref SubnetALB                    # Subnet where the ALB is deployed (must be public to allow internet traffic).
+      Tags:
+        - Key: Name                         # AWS tag for easier management and identification.
+          Value: NoteStripALB
+
+  # ALB Listener (listens on port 80 and forwards to Target Group)
+  # The ALB needs a listener to "listen" on a port (here HTTP 80) and forward requests to the Target Group.
+  # Only listen to HTTP for now because there's no certificate yet
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer  # Links this listener to the Application Load Balancer above.
+      Port: 80                               # Port where the ALB listens for incoming traffic (HTTP).
+      Protocol: HTTP                          # Protocol for incoming traffic.
+      DefaultActions:
+        - Type: forward                       # Action: forwards traffic to a target group.
+          TargetGroupArn: !Ref AppTargetGroup  # Target group where ALB sends traffic after receiving requests.
+
