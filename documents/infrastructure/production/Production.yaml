@@ -1,211 +1,300 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Production Infrastructure for NoteStrip Application'
+Parameters:
+  DBPassword:
+    Type: String
+    Description: "The master password for the NoteStrip RDS database"
+    NoEcho: true                                # Hides the password in console and logs
+    MinLength: 8                                # Optional security requirement
+    MaxLength: 41
+    AllowedPattern: "^[a-zA-Z0-9@#$%^&+=]*$"     # Allows common special characters
+    ConstraintDescription: "Password must be 8–41 characters and cannot contain '/', '@', '\"', or spaces."
+    
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
 Resources:
-  ## One VPC for the application
+  ##########################################################################
+  #                                                                        #
+  #                               VPC                                      #
+  #                                                                        #
+  ##########################################################################
   VPC:
     Type: 'AWS::EC2::VPC'
     Properties:
-      CidrBlock: '10.0.0.0/16'
+      CidrBlock: '10.0.0.0/22'
       EnableDnsSupport: true      # Allows DNS resolution inside the VPC
       EnableDnsHostnames: true    # Assigns DNS hostnames to instances
-  
-  
-  ## Internet Gateway 
+
+  ##########################################################################
+  #                                                                        #
+  #                     Internet Gateway                                   #
+  #                                                                        #
+  ##########################################################################
   # Note: Internet Gateway allows public subnets (e.g., ALB) to send/receive traffic from the internet
-  # Internet Gateway creation
+  # Without an IGW, resources in the VPC cannot be accessed from or reach out to the internet.
   InternetGateway:                
     Type: 'AWS::EC2::InternetGateway'
     Properties: {}
 
   # Connects the gateway to the VPC
+  # Makes the Internet Gateway usable for that VPC.
   VPCGatewayAttachment:           
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
- 
 
-  ## Subnets
-  # ALBs' subnet
-  SubnetALB:
+  ##########################################################################
+  #                                                                        #
+  #                     Subnets                                            #
+  #                                                                        #
+  ##########################################################################
+  # An Application Load Balancer needs to span two public subnets for high-availability
+  # Public subnet for an Application Load Balancer
+  SubnetALB1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.0.0/24
-      AvailabilityZone: us-east-1a
-      MapPublicIpOnLaunch: true # Whether to auto-assign public IPs to instances launched in this subnet (set to true for public subnets like for ALB).
+      CidrBlock: '10.0.0.0/24'
+      # GetAZs '' Returns a list of all AZs available in the region where you’re launching this stack.
+      # Select picks one item from that list.
+      AvailabilityZone: !Select [0, !GetAZs ''] 
+      MapPublicIpOnLaunch: true    # Automatically assign public IPs to resources
       Tags:
         - Key: Name
-          Value: SubnetALB
-  
-  # EC2s' subnet
-  SubnetEC2:
+          Value: SubnetALB1
+
+  # Public subnet for an Application Load Balancer
+  SubnetALB2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: us-east-1a
+      CidrBlock: '10.0.1.0/24'
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true   # Automatically assign public IPs to resources
+      Tags:
+        - Key: Name
+          Value: SubnetALB2
+  
+  # Private subnets for EC2s are in 10.0.2.0/24
+  # Private subnet for an EC2
+  PrivateSubnetApp1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: '10.0.2.0/25' # first half of 10.0.2.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: SubnetEC2
+          Value: PrivateSubnetApp1
   
-  # RDSs' subnet
-  SubnetRDS:
+  # Private subnet for an EC2
+  PrivateSubnetApp2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: us-east-1a
+      CidrBlock: '10.0.2.128/25' # second half of 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: SubnetRDS
+          Value: PrivateSubnetApp2
 
-  # Add second private subnet in a different Availability Zone
-  SubnetRDS2:
+  # For high availability, RDS can create a primary DB in one Availability Zone and a standby replica in another AZ.
+  # Private subnets for RDSs are in 10.0.3.0/24
+  # Private subnet for an RDS
+  PrivateSubnetDB1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.0.3.0/24
-      AvailabilityZone: us-east-1b
+      CidrBlock: '10.0.3.0/25' # first half of 10.0.3.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: SubnetRDS2
+          Value: PrivateSubnetDB1
 
-  
-  
-  ## Elastic IPs
-  # Allocates a static public IPv4 address in the VPC.
-  # Required because the NAT Gateway needs a public IP to send traffic to the internet. 
-  # Even though the NAT Gateway is in a public subnet, it needs this Elastic IP to function.
+  # Private subnet for an RDS
+  PrivateSubnetDB2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: '10.0.3.128/25' # second half of 10.0.3.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: PrivateSubnetDB2
+
+  ##########################################################################
+  #                                                                        #
+  #                     EIP                                                #
+  #                                                                        #
+  ##########################################################################
+  # This EIP provides a static public IP that the NAT Gateway will use to send outbound traffic to the internet. 
+  # Without it, instances in private subnets can’t reach the internet.
   NatEIP:
     Type: AWS::EC2::EIP
     Properties:
-      Domain: vpc
-  
+      Domain: vpc     # # Ensures the Elastic IP is created in the VPC domain (not EC2-Classic)
 
-  ## NAT Gateway
-  # Creates a NAT Gateway in SubnetALB, which is the public subnet.
-  # NAT Gateway only allows outbound traffic from private subnets; it doesn't allow inbound connections, which keeps the EC2s private.
+  ##########################################################################
+  #                                                                        #
+  #                     NAT Gateway                                        #
+  #                                                                        #
+  ##########################################################################
+  # The NAT Gateway allows instances in private subnets to access the internet (e.g., to download updates or connect to AWS services) 
+  # while keeping them unreachable from the public internet. It sits in a public subnet with a static Elastic IP and forwards outbound traffic from private subnets.
   NatGateway:
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt NatEIP.AllocationId  # Uses the Elastic IP from NatEIP so it can send requests out to the internet
-      SubnetId: !Ref SubnetALB
+      AllocationId: !GetAtt NatEIP.AllocationId   # Links the NAT Gateway to the Elastic IP created above
+      SubnetId: !Ref SubnetALB1                   # NAT Gateway must be in a public subnet; using SubnetALB1
       Tags:
         - Key: Name
           Value: NATGateway
 
-
-  ## Route Tables
-  # Creates a public route table 
-  RouteTablePublic: 
+  ##########################################################################
+  #                                                                        #
+  #                     Route Tables                                      #
+  #                                                                        #
+  ##########################################################################
+  # This route table will be used by public subnets (ALB1, ALB2) to allow inbound and outbound internet traffic via the Internet Gateway.
+  PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref VPC # Attach this route table to the defined VPC.
+      VpcId: !Ref VPC       # Attach this route table to the defined VPC.
       Tags:
         - Key: Name
-          Value: RouteTablePublic
+          Value: PublicRouteTable
 
-  # Creates a dedicated route table for the private subnet (SubnetEC2).
-  # This route table will have a route to the NAT Gateway, not the Internet Gateway.
-  RouteTablePrivate:
+  # This route table will be used by the private EC2 subnets (App1 and App2) to allow outbound internet access through the NAT Gateway.
+  PrivateAppRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: RouteTablePrivate
-
-
-  ## Route Rules
-  # Defines a route rule inside RouteTablePublic.
-  PublicRoute: 
+          Value: PrivateAppRouteTable
+    
+  ##########################################################################
+  #                                                                        #
+  #                     Route Rules                                        #
+  #                                                                        #
+  ##########################################################################
+  # This default route allows resources in public subnets to send outbound traffic to the internet and receive inbound traffic.
+  PublicDefaultRoute:
     Type: AWS::EC2::Route
-    DependsOn: VPCGatewayAttachment # Ensures the route is only created after the internet gateway is successfully attached to the VPC.
+    DependsOn: VPCGatewayAttachment     # Ensures IGW is attached before creating the route
     Properties:
-      RouteTableId: !Ref RouteTablePublic # Specifies that this route rule belongs to the RouteTablePublic.
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway # This sets the target for internet-bound traffic to go through the Internet Gateway defined earlier.
+      RouteTableId: !Ref PublicRouteTable   # Attaches to PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0   # All IPv4 traffic
+      GatewayId: !Ref InternetGateway   # Sends traffic to Internet Gateway
 
-  # Adds a rule to the RouteTablePrivate that sends all internet-bound traffic (0.0.0.0/0) to the NAT Gateway.
-  # This is what allows EC2 instances in SubnetEC2 to reach out to the internet securely (e.g., download software updates, connect to APIs).
-  PrivateRouteToInternet:
+  # This default route sends all outbound traffic from private EC2 instances to the NAT Gateway in the public subnet. This allows internet access for 
+  # software updates, package installations, etc., while remaining private.
+  PrivateAppDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
+      RouteTableId: !Ref PrivateAppRouteTable   # Attaches to PrivateAppRouteTable
+      DestinationCidrBlock: 0.0.0.0/0    # All IPv4 traffic
+      NatGatewayId: !Ref NatGateway      # Send traffic to NAT Gateway
   
-  ## Subnet Route Table Associations
-  # Associates a subnet with the route table so the subnet will use that routing logic.
-  SubnetRouteTableAssociationALB: 
+  ##########################################################################
+  #                                                                        #
+  #                     Subnet Route Table Associations                    #
+  #                                                                        #
+  ##########################################################################
+  # Associates the first public subnet (SubnetALB1) with the Public Route Table.
+  PublicSubnetALB1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref SubnetALB # The ALB subnet made public by associating it with the public route table.
-      RouteTableId: !Ref RouteTablePublic # Links the SubnetALB to the PublicRouteTable, which routes internet traffic through the IGW.
-
-  # Connects the EC2 subnet (SubnetEC2) to the private route table.
-  # This ensures that instances in this subnet use the NAT Gateway (and not the Internet Gateway) for internet-bound traffic.
-  SubnetRouteTableAssociationEC2:
+      SubnetId: !Ref SubnetALB1
+      RouteTableId: !Ref PublicRouteTable
+    
+  # Associates the second public subnet (SubnetALB2) with the Public Route Table.
+  PublicSubnetALB2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref SubnetEC2
-      RouteTableId: !Ref RouteTablePrivate
-  # Note: SubnetEC2 and SubnetRDS are already inside the same VPC, so there's no need to explicitly add route rules between them
+      SubnetId: !Ref SubnetALB2
+      RouteTableId: !Ref PublicRouteTable
 
+  # Associates the first private EC2 subnet (PrivateSubnetApp1) with the PrivateAppRouteTable.
+  PrivateSubnetApp1RouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+        SubnetId: !Ref PrivateSubnetApp1
+        RouteTableId: !Ref PrivateAppRouteTable
+    
+  # Associates the second private EC2 subnet (PrivateSubnetApp2) with the PrivateAppRouteTable.
+  PrivateSubnetApp2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetApp2
+      RouteTableId: !Ref PrivateAppRouteTable
 
-  ## Network Access Control Lists
-  # NACL for SubnetALB
-  NACLSubnetALB:
+  ##########################################################################
+  #                                                                        #
+  #                     NACLs                                              #
+  #                                                                        #
+  ##########################################################################
+  # Stateless firewall for public subnets (ALB1 and ALB2)
+  PublicNACL:
     Type: AWS::EC2::NetworkAcl
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: NACLSubnetALB
-
-  # NACL for SubnetEC2
-  NACLSubnetEC2:
+          Value: PublicNACL
+  
+  # Stateless firewall for private EC2 subnets (App1 and App2)
+  PrivateAppNACL:
     Type: AWS::EC2::NetworkAcl
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: NACLSubnetEC2
+          Value: PrivateAppNACL
 
-  # NACL for SubnetRDS
-  NACLSubnetRDS:
+  # Stateless firewall for private RDS subnets (DB1 and DB2)
+  PrivateDBNACL:
     Type: AWS::EC2::NetworkAcl
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: NACLSubnetRDS
-
-
-  ## Network Access Control List Rules
-  # SubnetALB: Allows inbound traffic on port 80 (HTTP).
-  NACLSubnetALBInboundHTTP:
+          Value: PrivateDBNACL
+    
+  ##########################################################################
+  #                                                                        #
+  #                     NACL Rules                                         #
+  #                                                                        #
+  ##########################################################################
+  ##########################################################################
+  #                     SubnetALBs rules                                   #
+  ##########################################################################
+  # Inbound HTTP (port 80)
+  PublicNACLInboundHTTP:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetALB
-      RuleNumber: 100 # rules are processed in order; lowest number first.
-      Protocol: 6  # Protocol: 6 → means TCP.
+      NetworkAclId: !Ref PublicNACL
+      RuleNumber: 100
+      Protocol: 6                    # 6 = TCP
       RuleAction: allow
-      Egress: false # false means this is for incoming packets.
-      CidrBlock: 0.0.0.0/0 # allows from any IP address on the internet.
+      Egress: false                  # false = inbound; true = outbound
+      CidrBlock: 0.0.0.0/0           # Allow from anywhere
       PortRange:
         From: 80
         To: 80
 
-  # SubnetALB: Allows inbound traffic on port 443 (HTTPS).
-  NACLSubnetALBInboundHTTPS:
+  # Inbound HTTPS (port 443)
+  PublicNACLInboundHTTPS:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetALB
+      NetworkAclId: !Ref PublicNACL
       RuleNumber: 110
       Protocol: 6
       RuleAction: allow
@@ -215,92 +304,219 @@ Resources:
         From: 443
         To: 443
 
-  # SubnetALB: Allow All Outbound Traffic
-  NACLSubnetALBOutboundAll:
+  # Inbound Ephemeral Ports (for return traffic from clients)
+  # Ephemeral ports are temporary, high-numbered TCP ports (usually 1024–65535) that your OS automatically assigns for return traffic in a client-server connection.
+  # Without allowing ephemeral ports, return traffic gets blocked, even if you allow HTTP/HTTPS.
+  PublicNACLInboundEphemeral:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetALB
-      RuleNumber: 100
-      Protocol: -1  # Protocol: -1 means all protocols (TCP, UDP, ICMP, etc.).
+      NetworkAclId: !Ref PublicNACL
+      RuleNumber: 120
+      Protocol: 6
       RuleAction: allow
-      Egress: true # Egress: true → means this is for outbound packets.
+      Egress: false
       CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 1024
+        To: 65535
 
-  # SubnetEC2: Inbound from SubnetALB on port 80 (HTTP)
-  NACLSubnetEC2InboundFromALB:
+  # Outbound HTTP
+  PublicNACLOutboundHTTP:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetEC2
+      NetworkAclId: !Ref PublicNACL
       RuleNumber: 100
-      Protocol: 6  # TCP
+      Protocol: 6
       RuleAction: allow
-      Egress: false
-      CidrBlock: 10.0.0.0/24
+      Egress: true
+      CidrBlock: 0.0.0.0/0
       PortRange:
         From: 80
         To: 80
 
-  # SubnetEC2: Inbound HTTPS (443) from SubnetALB
-  NACLSubnetEC2InboundFromALBHTTPS:
+  # Outbound HTTPS
+  PublicNACLOutboundHTTPS:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetEC2
-      RuleNumber: 105  # Make sure it's unique and ordered correctly
-      Protocol: 6  # TCP
+      NetworkAclId: !Ref PublicNACL
+      RuleNumber: 110
+      Protocol: 6
       RuleAction: allow
-      Egress: false
-      CidrBlock: 10.0.0.0/24 
+      Egress: true
+      CidrBlock: 0.0.0.0/0
       PortRange:
         From: 443
         To: 443
 
-  # SubnetEC2: Inbound from SubnetRDS on port 3306 (MySQL)
-  NACLSubnetEC2InboundFromRDS:
+  # Outbound Ephemeral Ports
+  PublicNACLOutboundEphemeral:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetEC2
+      NetworkAclId: !Ref PublicNACL
+      RuleNumber: 120
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 1024
+        To: 65535
+
+  ##########################################################################
+  #                     PrivateSubnetApp rules                             #
+  ##########################################################################
+  # Inbound traffic from ALB (HTTP)
+  PrivateAppNACLInboundHTTP:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      # ALB is in public subnets, so allow traffic from those CIDR blocks
+      CidrBlock: 10.0.0.0/23   # Covers SubnetALB1 (10.0.0.0/24) and SubnetALB2 (10.0.1.0/24)
+      PortRange:
+        From: 80
+        To: 80
+
+  # Inbound HTTPS from ALB
+  PrivateAppNACLInboundHTTPS:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 110
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 10.0.0.0/23
+      PortRange:
+        From: 443
+        To: 443
+
+  # Inbound Ephemeral Ports for response traffic
+  PrivateAppNACLInboundEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 120
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 10.0.0.0/22   # Allow responses from NAT and RDS within VPC; Basically the entire VPC
+      PortRange:
+        From: 1024
+        To: 65535
+
+  # Outbound HTTP to NAT Gateway (internet access)
+  PrivateAppNACLOutboundHTTP:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      # NAT Gateway is in public subnet 10.0.0.0/23
+      CidrBlock: 10.0.0.0/23
+      PortRange:
+        From: 80
+        To: 80
+
+  # Outbound HTTPS to NAT Gateway
+  PrivateAppNACLOutboundHTTPS:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 110
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 10.0.0.0/23
+      PortRange:
+        From: 443
+        To: 443
+
+  # Outbound to RDS subnets (for DB connections)
+  PrivateAppNACLOutboundDB:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 120
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 10.0.3.0/24  # Both DB subnets combined
+      PortRange:
+        From: 3306
+        To: 3306
+
+  # Outbound Ephemeral Ports for response traffic
+  PrivateAppNACLOutboundEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateAppNACL
+      RuleNumber: 130
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 10.0.0.0/22
+      PortRange:
+        From: 1024
+        To: 65535
+
+  ##########################################################################
+  #                     PrivateSubnetDB rules                              #
+  ##########################################################################
+  # Inbound MySQL traffic from Private EC2 subnets
+  PrivateDBNACLInboundDB:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateDBNACL
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      # Covers both PrivateSubnetApp1 and PrivateSubnetApp2
+      CidrBlock: 10.0.2.0/24
+      PortRange:
+        From: 3306
+        To: 3306
+
+  # Inbound Ephemeral Ports for return traffic
+  PrivateDBNACLInboundEphemeral:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref PrivateDBNACL
       RuleNumber: 110
       Protocol: 6
       RuleAction: allow
       Egress: false
       CidrBlock: 10.0.2.0/24
       PortRange:
-        From: 3306
-        To: 3306
+        From: 1024
+        To: 65535
 
-  # SubnetEC2: Outbound to SubnetALB on port 80 (HTTP)
-  NACLSubnetEC2OutboundToALB:
+  # Outbound Ephemeral Ports for response traffic
+  PrivateDBNACLOutboundEphemeral:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetEC2
+      NetworkAclId: !Ref PrivateDBNACL
       RuleNumber: 100
       Protocol: 6
       RuleAction: allow
       Egress: true
-      CidrBlock: 10.0.0.0/24
+      # Allow responses to the App subnets
+      CidrBlock: 10.0.2.0/24
       PortRange:
-        From: 80
-        To: 80
+        From: 1024
+        To: 65535
 
-  # SubnetEC2: Outbound HTTPS back to SubnetALB
-  NACLSubnetEC2OutboundToALBHTTPS:
+  # Outbound MySQL (if needed for replication/monitoring)
+  PrivateDBNACLOutboundDB:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
-      NetworkAclId: !Ref NACLSubnetEC2
-      RuleNumber: 105  # Same number as above for logical pairing
-      Protocol: 6
-      RuleAction: allow
-      Egress: true
-      CidrBlock: 10.0.0.0/24  
-      PortRange:
-        From: 443
-        To: 443
-
-  # SubnetEC2: Outbound to SubnetRDS on port 3306 (MySQL)
-  NACLSubnetEC2OutboundToRDS:
-    Type: AWS::EC2::NetworkAclEntry
-    Properties:
-      NetworkAclId: !Ref NACLSubnetEC2
+      NetworkAclId: !Ref PrivateDBNACL
       RuleNumber: 110
       Protocol: 6
       RuleAction: allow
@@ -310,87 +526,81 @@ Resources:
         From: 3306
         To: 3306
 
-  # SubnetRDS: inbound MySQL (3306) from SubnetEC2
-  NACLSubnetRDSInboundFromEC2:
-    Type: AWS::EC2::NetworkAclEntry
-    Properties:
-      NetworkAclId: !Ref NACLSubnetRDS
-      RuleNumber: 100
-      Protocol: 6  # TCP
-      RuleAction: allow
-      Egress: false
-      CidrBlock: 10.0.1.0/24  # SubnetEC2
-      PortRange:
-        From: 3306
-        To: 3306
-
-  # SubnetRDS: Allow outbound MySQL response to SubnetEC2
-  NACLSubnetRDSOutboundToEC2:
-    Type: AWS::EC2::NetworkAclEntry
-    Properties:
-      NetworkAclId: !Ref NACLSubnetRDS
-      RuleNumber: 100
-      Protocol: 6
-      RuleAction: allow
-      Egress: true
-      CidrBlock: 10.0.1.0/24  # SubnetEC2
-      PortRange:
-        From: 3306
-        To: 3306
-
-
-  ## Subnet NACL Associations
-  # Associate NACLSubnetALB with SubnetALB
-  SubnetALBNACLAssociation:
+  ##########################################################################
+  #                                                                        #
+  #                     NACL Associations                                  #
+  #                                                                        #
+  ##########################################################################
+  # Connects public subnet SubnetALB1 to PublicNACL nacl
+  PublicNACLAssociationSubnetALB1:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
-      SubnetId: !Ref SubnetALB
-      NetworkAclId: !Ref NACLSubnetALB
+      SubnetId: !Ref SubnetALB1
+      NetworkAclId: !Ref PublicNACL
 
-  # Associate NACLSubnetEC2 with SubnetEC2
-  SubnetEC2NACLAssociation:
+  # Connects public subnet SubnetALB2 to PublicNACL nacl
+  PublicNACLAssociationSubnetALB2:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
-      SubnetId: !Ref SubnetEC2
-      NetworkAclId: !Ref NACLSubnetEC2
+      SubnetId: !Ref SubnetALB2
+      NetworkAclId: !Ref PublicNACL
 
-  # Associate NACLSubnetRDS with SubnetRDS
-  SubnetRDSNACLAssociation:
+  # Connects private subnet PrivateSubnetApp1 to PrivateAppNACL nacl
+  PrivateAppNACLAssociationSubnetApp1:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
-      SubnetId: !Ref SubnetRDS
-      NetworkAclId: !Ref NACLSubnetRDS
+      SubnetId: !Ref PrivateSubnetApp1
+      NetworkAclId: !Ref PrivateAppNACL
 
-  # Add a Network ACL for the second RDS subnet
-  # Shares the same NetworkAclId as SubnetRDSNACLAssociation
-  SubnetRDS2NACLAssociation:
+  # Connects private subnet PrivateSubnetApp2 to PrivateAppNACL nacl
+  PrivateAppNACLAssociationSubnetApp2:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
-      SubnetId: !Ref SubnetRDS2
-      NetworkAclId: !Ref NACLSubnetRDS
+      SubnetId: !Ref PrivateSubnetApp2
+      NetworkAclId: !Ref PrivateAppNACL
 
+  # Connects private subnet PrivateSubnetDB1 to PrivateDBNACL nacl
+  PrivateDBNACLAssociationSubnetDB1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetDB1
+      NetworkAclId: !Ref PrivateDBNACL
 
-  ## Security Groups
-  ## ALB Security Group
+  # Connects private subnet PrivateSubnetDB2 to PrivateDBNACL nacl
+  PrivateDBNACLAssociationSubnetDB2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetDB2
+      NetworkAclId: !Ref PrivateDBNACL
+    
+  ##########################################################################
+  #                                                                        #
+  #                     Security Groups                                    #
+  #                                                                        #
+  ##########################################################################
+  # ALB Security Group
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow HTTP and HTTPS from the internet
+      GroupDescription: Security group for Application Load Balancer
       VpcId: !Ref VPC
       SecurityGroupIngress:
+        # Allow inbound HTTP
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0   # Allow HTTP from anywhere
+          CidrIp: 0.0.0.0/0
+        # Allow inbound HTTPS
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: 0.0.0.0/0   # Allow HTTPS from anywhere
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
+        # Allow all outbound traffic (needed for ALB to talk to targets)
         - IpProtocol: -1
           FromPort: 0
-          ToPort: 65535
-          CidrIp: 0.0.0.0/0   # Allow all outbound traffic (standard for ALB)
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: ALBSecurityGroup
@@ -399,26 +609,21 @@ Resources:
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: EC2SecurityGroup
-      GroupDescription: Allow HTTP, HTTPS, and SSH access for EC2 instances
+      GroupDescription: Security group for application EC2 instances
       VpcId: !Ref VPC
-      SecurityGroupIngress: # Inbound rules (e.g., HTTP, HTTPS, SSH).
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0  # Allow SSH from anywhere — tighten for production use
+      SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0  # HTTP from anywhere
+          SourceSecurityGroupId: !Ref ALBSecurityGroup  # Only ALB can talk to EC2 on HTTP
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: 0.0.0.0/0  # HTTPS from anywhere
-      SecurityGroupEgress: # Outbound rules (default is allow-all)
+          SourceSecurityGroupId: !Ref ALBSecurityGroup  # Only ALB can talk to EC2 on HTTPS
+      SecurityGroupEgress:
         - IpProtocol: -1
           FromPort: 0
-          ToPort: 65535
+          ToPort: 0
           CidrIp: 0.0.0.0/0  # Allow all outbound traffic
       Tags:
         - Key: Name
@@ -428,297 +633,336 @@ Resources:
   RDSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: RDSSecurityGroup
-      GroupDescription: Allow MySQL access from EC2 subnet only
+      GroupDescription: Security group for RDS database
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
-          CidrIp: 10.0.1.0/24  # SubnetEC2's CIDR block
+          SourceSecurityGroupId: !Ref EC2SecurityGroup  # Only EC2 can talk to RDS
       SecurityGroupEgress:
         - IpProtocol: -1
           FromPort: 0
-          ToPort: 65535
-          CidrIp: 0.0.0.0/0  # Allow all outbound traffic (optional; usually default)
+          ToPort: 0
+          CidrIp: 0.0.0.0/0  # Allow outbound if needed for monitoring/replication
       Tags:
         - Key: Name
           Value: RDSSecurityGroup
 
-
-  ## IAM Role and Policies
-  # EC2 Instance IAM Role
-  EC2InstanceRole:
+  ##########################################################################
+  #                                                                        #
+  #                     IAM Role, Policy, Instance Profile                 #
+  #                                                                        #
+  ##########################################################################
+  # IAM Role for EC2
+  EC2IAMRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: EC2InstanceRole
-      AssumeRolePolicyDocument: # This is the trust policy. It allows EC2 instances (the service ec2.amazonaws.com) to assume this role using sts:AssumeRole.
-        Version: '2012-10-17'
+      RoleName: NoteStripEC2Role
+      AssumeRolePolicyDocument:   # This is the trust policy. It allows EC2 instances (the service ec2.amazonaws.com) to assume this role using sts:AssumeRole.
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
               Service: ec2.amazonaws.com
             Action: sts:AssumeRole
-      Path: "/"
-      Policies: # Names the policy and begins defining its actions.
-        - PolicyName: EC2AccessPolicy
+      ManagedPolicyArns:
+        # AWS managed policy for basic EC2 access to CloudWatch (logs, metrics)
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        # Policy for PM2 to publish logs directly to CloudWatch
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+      Policies:
+        - PolicyName: NoteStripS3AccessPolicy
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
-              - Effect: Allow # Allows EC2 to read from, write to, and list contents of any S3 bucket.
+              - Effect: Allow
                 Action:
+                  - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
-                  - s3:ListBucket
-                Resource: "*"
-              - Effect: Allow # Allows EC2 to send logs to CloudWatch (e.g., from your app or cloud-init logs).
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: "*"
-              - Effect: Allow # Grants permissions for the SSM agent to communicate with AWS. Enables Session Manager, Run Command, and other management features—without requiring SSH access.
-                Action:
-                  - ssm:DescribeInstanceInformation
-                  - ssm:GetCommandInvocation
-                  - ssm:SendCommand
-                  - ssm:StartSession
-                  - ssm:TerminateSession
-                  - ec2messages:*
-                  - ssmmessages:*
-                Resource: "*"
-              - Effect: Allow # Optional: Lets EC2 connect to RDS instances that use IAM-based database authentication.
-                Action: 
-                  - rds-db:connect
-                Resource: "*"
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub arn:aws:s3:::notestrip-storage-bucket
+                  - !Sub arn:aws:s3:::notestrip-storage-bucket/*
 
-
-  ## IAM Instance Profile
-  # Creates an Instance Profile, which is how an IAM Role is attached to an EC2 instance.
+  # Instance Profile to attach Role to EC2
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Properties: # This associates the role created (EC2InstanceRole) with the instance profile.
-      InstanceProfileName: EC2InstanceProfile 
+    Properties:
+      InstanceProfileName: NoteStripEC2InstanceProfile
       Roles:
-        - !Ref EC2InstanceRole
-
-
-  ## S3
-  # Creates a Gateway VPC Endpoint for S3.
-  # Ensures S3 traffic stays within the AWS network (private), instead of traversing the public internet.
-  S3VPCEndpoint:
-    Type: AWS::EC2::VPCEndpoint
+        - !Ref EC2IAMRole
+  
+  # IAM Policy for CloudWatch Logs  
+  EC2CloudWatchLogsPolicy:
+    Type: AWS::IAM::Policy
     Properties:
-      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
-      VpcId: !Ref VPC
-      RouteTableIds: # Connected to RouteTablePrivate so EC2 instances in SubnetEC2 can access S3 through this endpoint.
-        - !Ref RouteTablePrivate
-      VpcEndpointType: Gateway
-      Tags:
-        - Key: Name
-          Value: S3VPCEndpoint
-
-  # Creates an S3 bucket named notestrip-storage-bucket.
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: notestrip-storage-bucket
-      Tags:
-        - Key: Name
-          Value: NoteStripStorageBucket
-
-  # Restricts access to the S3 bucket.
-  # Result: Even if credentials are leaked, access is denied unless the call comes from within your VPC through the approved VPC Endpoint.
-  S3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref S3Bucket
+      PolicyName: NoteStripCloudWatchLogsPolicy
+      Roles:
+        - !Ref EC2IAMRole                   # Attach to EC2 IAM Role
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: AllowAccessOnlyFromVPCSubnetEC2ViaVPCE
-            Effect: Deny
-            Principal: "*"
-            Action: "s3:*"
-            Resource:
-              - !Sub "arn:aws:s3:::${S3Bucket}"
-              - !Sub "arn:aws:s3:::${S3Bucket}/*"
-            Condition:
-              StringNotEquals:
-                aws:SourceVpce: !Ref S3VPCEndpoint
-              ArnNotEquals:
-                aws:PrincipalArn:
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:user/admin"
-                  - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup         # Allow creating new log groups
+              - logs:CreateLogStream        # Allow creating log streams
+              - logs:PutLogEvents           # Allow pushing log events
+            Resource: "*"
 
-
-  ## RDS
-  # RDS Parameter Group (enables time zone + event scheduler)
-  RDSParameterGroup:
-    Type: AWS::RDS::DBParameterGroup
+  ##########################################################################
+  #                                                                        #
+  #                     S3 Bucket                                          #
+  #                                                                        #
+  ##########################################################################
+  # REMINDER: Make a stack for S3 Bucket alone and upload notestrip.zip file there first 
+  # S3 Bucket for storing application files
+  NoteStripS3Bucket:
+    Type: AWS::S3::Bucket
     Properties:
-      Description: RDS parameter group with scheduling and timezone for Texas
-      Family: mysql8.0
-      Parameters:
-        time_zone: "US/Central"
-        event_scheduler: "ON"
+      BucketName: notestrip-storage-bucket  # Gives the bucket a fixed name (must be globally unique)
+      AccessControl: Private                # Ensures default permissions are private (not publicly readable)
+      PublicAccessBlockConfiguration:       # Blocks all public access to the bucket for extra security
+        BlockPublicAcls: true                # Prevents adding new public ACLs
+        BlockPublicPolicy: true              # Prevents bucket policies that would make data public
+        IgnorePublicAcls: true               # Ignores any existing public ACLs
+        RestrictPublicBuckets: true          # Restricts access if public policies are accidentally applied
+      VersioningConfiguration:
+        Status: Suspended                       # Disabled: Keeps multiple versions of objects (for recovery and history)
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:   # Enforces encryption for all objects stored in the bucket
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256           # Uses AES-256 encryption for strong data security
+
+  # Bucket policies for NoteStripS3Bucket
+  # This means any entity assuming the EC2 role can access the bucket from anywhere, not just from inside the VPC.
+  NoteStripS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref NoteStripS3Bucket          # The bucket to which this policy will be attached
+      PolicyDocument:
+        Version: "2012-10-17"                 # Policy language version
+        Statement:
+          # Allow CloudWatch Logs to write exported logs
+          - Effect: Allow
+            Principal:
+              Service: logs.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${NoteStripS3Bucket}/AWSLogs/${AWS::AccountId}/*
+
+  ##########################################################################
+  #                                                                        #
+  #                     RDS Database Instance                              #
+  #                                                                        #
+  ##########################################################################
+  # RDS Instance
+  NoteStripRDSInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete                                  # Skips snapshot on stack deletion
+    Properties:
+      DBInstanceIdentifier: notestrip-db                    # Logical DB name
+      AllocatedStorage: 20                                   # Storage in GB
+      DBInstanceClass: db.t3.micro                           # Small instance type for cost-efficiency
+      Engine: mysql                                          # MySQL engine
+      EngineVersion: "8.0.35"                                # Specific version for consistency
+      MasterUsername: admin                                  # Admin user
+      MasterUserPassword: !Ref DBPassword                    # Should be a secure parameter
+      # You might think it makes two separate DB instances, but CloudFormation creates just one RDS.
+      # Multi-AZ means AWS creates a single RDS cluster with a primary and a standby automatically spread across the two subnets in the DBSubnetGroup.
+      MultiAZ: true                                          # Enables standby in 2nd AZ
+      StorageEncrypted: true                                 # Encrypts data at rest
+      BackupRetentionPeriod: 7                               # Automated backups for 7 days
+      PubliclyAccessible: false                              # Keeps DB private
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup                              # Only EC2 can access
+      DBSubnetGroupName: !Ref DBSubnetGroup                  # Ensures DB uses the private DB subnets; attached from DBSubnetGroup
+      DBParameterGroupName: !Ref DBParameterGroup            # Uses a DB Parameter group
+      DeletionProtection: false                              
       Tags:
         - Key: Name
-          Value: RDSParameterGroup
+          Value: NoteStripRDSInstance
 
-  # RDS Subnet Group (required for VPC placement)
-  RDSSubnetGroup:
+  # Subnet group of the RDS instance
+  DBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Subnet group for RDS inside private subnets
+      DBSubnetGroupDescription: Subnet group for NoteStrip RDS
       SubnetIds:
-        - !Ref SubnetRDS
-        - !Ref SubnetRDS2
-      DBSubnetGroupName: rds-subnet-group
+        - !Ref PrivateSubnetDB1
+        - !Ref PrivateSubnetDB2
       Tags:
         - Key: Name
-          Value: RDSSubnetGroup
+          Value: NoteStripDBSubnetGroup
 
-  # RDS Instance
-  MySQLDatabase:
-    Type: AWS::RDS::DBInstance
+  # Parameter group for the RDS instances
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
     Properties:
-      DBInstanceIdentifier: notestrip-db
-      Engine: mysql
-      EngineVersion: 8.0.35
-      DBInstanceClass: db.t3.micro  # free tier eligible or small test size
-      AllocatedStorage: 20
-      MaxAllocatedStorage: 100
-      DBName: NoteStripDB
-      MasterUsername: admin
-      MasterUserPassword: somethingsomethingpassword123  # Consider using Secrets Manager instead
-      PubliclyAccessible: false  # Keep private
-      MultiAZ: false             # Set true for HA in production
-      VPCSecurityGroups:
-        - !GetAtt RDSSecurityGroup.GroupId
-      DBSubnetGroupName: !Ref RDSSubnetGroup
-      DBParameterGroupName: !Ref RDSParameterGroup
-      BackupRetentionPeriod: 7  # Keep backups for 7 days
-      DeletionProtection: false # true in production
-      StorageType: gp2
+      Description: "Parameter group for NoteStrip MySQL RDS"
+      Family: "mysql8.0"                 # Must match your MySQL engine version
+      Parameters:
+        time_zone: "US/Central"          # Sets DB instance time zone
+        event_scheduler: "ON"            # Enables scheduled events (e.g., from tables)
       Tags:
         - Key: Name
-          Value: NoteStripDatabase
+          Value: NoteStripDBParameterGroup
 
-  
-  ## Launch Template
-  LaunchTemplate:
+  ##########################################################################
+  #                                                                        #
+  #                     EC2 Launch Template                                #
+  #                                                                        #
+  ##########################################################################
+  # A “blueprint” that describes how web server EC2 instances should look (OS image, instance type, security groups, startup script, disk size).
+  NoteStripLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: NoteStripLaunchTemplate
+      LaunchTemplateName: NoteStripAppLaunchTemplate  
       LaunchTemplateData:
-        ImageId: ami-0abcdef1234567890   # Use region-specific AMI (e.g., Amazon Linux 2)
-        InstanceType: t3.micro
-        SecurityGroupIds:
-          - !Ref EC2SecurityGroup
+        ImageId: !Ref LatestAmiId
+        InstanceType: t3.micro           # Instance size/type (low-cost general purpose)
         IamInstanceProfile:
-          Arn: !GetAtt EC2InstanceProfile.Arn
-        BlockDeviceMappings:
-          - DeviceName: /dev/xvda        # Root volume name (default for Amazon Linux)
-            Ebs:
-              VolumeSize: 30             # 30GB EBS volume
-              VolumeType: gp3            # gp3 (recommended over gp2)
-              DeleteOnTermination: true  # Automatically delete when instance is terminated
-              Encrypted: true            # Encrypt the EBS volume
-        UserData: !Base64 |
+          Arn: !GetAtt EC2InstanceProfile.Arn  # Links EC2 to IAM instance profile (for S3, CloudWatch access)    
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: false   # Ensures instance gets no public IP (private subnet)
+            DeviceIndex: 0                    # Primary network interface
+            Groups:
+              - !Ref EC2SecurityGroup         # Security group for controlling inbound/outbound traffic
+        UserData: !Base64 |                   # Startup script that runs when instance launches
           #!/bin/bash
+          set -e
+
           yum update -y
-          yum install -y nodejs git
-          # Example: pull your app code and start
-          cd /home/ec2-user
-          git clone https://github.com/your-repo.git
-          cd your-repo
-          npm install
-          npm run start
+
+          curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+          yum install -y nodejs unzip nginx aws-cli
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda             # Root volume device name
+            Ebs:
+              VolumeSize: 20                  # Disk size (20 GB)
+              VolumeType: gp3                 # General-purpose SSD
+              DeleteOnTermination: true       # Deletes volume when instance is terminated
         TagSpecifications:
-          - ResourceType: instance
+          - ResourceType: instance            # Applies tags to EC2 instances launched
             Tags:
               - Key: Name
-                Value: NoteStripAppServer
-          - ResourceType: volume
-            Tags:
-              - Key: Name
-                Value: NoteStripAppVolume
+                Value: NoteStripAppServer      # Name tag for easy identification
 
-  
-  ## Auto Scaling Group
-  # Manages the EC2 fleet dynamically.
-  # Uses Launch Template to create instances.
-  # Health checks via ALB ensure only healthy instances receive traffic.
-  AutoScalingGroup:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    Properties:
-      AutoScalingGroupName: NoteStripASG               # Name for the Auto Scaling Group (appears in AWS console).
-      MinSize: 1                                      # Minimum number of EC2 instances that must always be running.
-      MaxSize: 2                                      # Maximum number of EC2 instances the ASG can scale out to.
-      DesiredCapacity: 1                               # Initial number of EC2 instances to launch when the stack is created.
-      VPCZoneIdentifier:
-        - !Ref SubnetEC2                               # Private subnet where EC2 instances will be launched.
-      LaunchTemplate:
-        LaunchTemplateId: !Ref LaunchTemplate          # References the previously defined Launch Template for EC2 configuration.
-        Version: !GetAtt LaunchTemplate.LatestVersionNumber  # Uses the latest version of the Launch Template.
-      TargetGroupARNs:
-        - !Ref AppTargetGroup                          # Registers instances with the ALB Target Group for load balancing.
-      HealthCheckType: ELB                             # Uses the ALB health checks to determine if instances are healthy.
-      HealthCheckGracePeriod: 300                      # Waits 300 seconds (5 min) after launching before checking health status.
-      Tags:
-        - Key: Name
-          Value: NoteStripAppInstance                  # Tag applied to each instance created by the ASG.
-          PropagateAtLaunch: true                      # Ensures the tag is automatically added to all launched EC2 instances.
-
-  
-  ## Load Balancer
-  # Target Group: A logical grouping of EC2 instances behind the ALB. 
-  # The ALB sends traffic to healthy instances in this group.
-  # Only listen to HTTP for now because there's no certificate yet
-  AppTargetGroup:
+  ##########################################################################
+  #                                                                        #
+  #                     Target Group for ALB                               #
+  #                                                                        #
+  ##########################################################################
+  # A group that keeps track of which EC2 instances can receive traffic. It checks their health (are they alive and responding?).
+  NoteStripTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      VpcId: !Ref VPC          
-      Name: NoteStripTargetGroup        # Human-readable name for the Target Group.
-      Protocol: HTTP                    # Protocol the ALB uses to route traffic to instances (HTTP).
-      Port: 80                          # Port on the EC2 instances that will receive traffic (typically 80 for web apps).
-      TargetType: instance               # Target is individual EC2 instances (not IPs or Lambda functions).
-      HealthCheckProtocol: HTTP          # Protocol used by the ALB to check the health of instances.
-      HealthCheckPath: /                 # URL path for health checks; ALB sends requests to `http://instance-ip/`.
-      HealthCheckIntervalSeconds: 30     # Time (in seconds) between consecutive health checks.
-      HealthCheckTimeoutSeconds: 5       # Time to wait for a health check response before marking it failed.
-      HealthyThresholdCount: 2           # Number of consecutive successful health checks before marking the instance healthy.
-      UnhealthyThresholdCount: 5         # Number of consecutive failed health checks before marking the instance unhealthy.
+      Name: NoteStripAppTargetGroup                   # Name for identifying this target group
+      Protocol: HTTP                                  # Protocol the ALB uses to communicate with EC2
+      Port: 80                                        # Port where your EC2 instances listen (HTTP)
+      TargetType: instance                            # Targets are EC2 instances (not IPs or Lambda)
+      VpcId: !Ref VPC                                 # VPC where your EC2 instances and ALB exist
+      HealthCheckProtocol: HTTP                       # Protocol for health checks
+      HealthCheckPort: traffic-port                   # Uses the same port as the target group (80)
+      HealthCheckPath: /                              # ALB will check this path for instance health
+      HealthCheckIntervalSeconds: 30                  # Interval between health checks (default: 30s)
+      HealthCheckTimeoutSeconds: 5                    # Time to wait for a response before marking unhealthy
+      HealthyThresholdCount: 3                        # Number of consecutive successful checks to mark healthy
+      UnhealthyThresholdCount: 2                      # Number of consecutive failed checks to mark unhealthy
+      Matcher:                                        # Response code matcher for health checks
+        HttpCode: 200-399                             # Consider 2xx and 3xx as healthy
       Tags:
-        - Key: Name                 
-          Value: NoteStripTargetGroup
+        - Key: Name
+          Value: NoteStripTargetGroup                 # Tag for easier identification
 
-  # Application Load Balancer: Distributes incoming traffic from the internet to instances in private subnets.
-  ApplicationLoadBalancer:
+  ##########################################################################
+  #                                                                        #
+  #                     Auto Scaling Group (ASG)                           #
+  #                                                                        #
+  ##########################################################################
+  # ASG requires a launch template and knows which Target Group(s) to attach instances to.
+  # Registers these EC2 instances in the Target Group, so they start receiving traffic automatically.
+  NoteStripAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: NoteStripAppASG               # Name of the ASG for identification
+      VPCZoneIdentifier:                                 # Subnets where EC2 instances will be launched
+        - !Ref PrivateSubnetApp1                         # First private subnet
+        - !Ref PrivateSubnetApp2                         # Second private subnet for HA
+      LaunchTemplate:                                    # Reference to the previously defined Launch Template
+        LaunchTemplateId: !Ref NoteStripLaunchTemplate   # ID of the launch template
+        Version: !GetAtt NoteStripLaunchTemplate.LatestVersionNumber # Ensures it uses the latest template version
+      MinSize: 1                                         # Minimum number of running EC2 instances
+      MaxSize: 2                                         # Maximum number of running EC2 instances
+      DesiredCapacity: 1                                 # Target number of running instances at launch
+      TargetGroupARNs:                                   # ALB Target Groups to register instances
+        - !Ref NoteStripTargetGroup                      # Associates ASG with the HTTP target group
+      HealthCheckType: ELB                               # Health checks based on ELB instance status
+      HealthCheckGracePeriod: 60                         # Seconds to wait before checking instance health
+      MetricsCollection:                                 # Enables monitoring for scaling decisions
+        - Granularity: "1Minute"                         # Collect metrics every minute
+      Tags:                                              # Tags applied to all instances launched by ASG
+        - Key: Name
+          Value: NoteStripAppServer
+          PropagateAtLaunch: true                        # Ensures the tag is applied to new instances
+
+  ##########################################################################
+  #                                                                        #
+  #                     Application Load Balancer (ALB)                    #
+  #                                                                        #
+  ##########################################################################
+  # A single public endpoint (internet-facing) that receives HTTP requests from users.
+  # ALB can only forward traffic to an existing Target Group
+  # Uses the Target Group to forward incoming requests to healthy EC2 servers running in the private subnets.
+  NoteStripALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: NoteStripALB                   # Name for the ALB (appears in AWS console).
-      Scheme: internet-facing              # Makes the ALB public-facing with an external IP and DNS name.
-      Type: application                    # Defines it as an Application Load Balancer (HTTP/HTTPS layer 7 routing).
-      SecurityGroups:
-        - !Ref ALBSecurityGroup             # Security group allowing inbound HTTP/HTTPS traffic to the ALB.
-      Subnets:
-        - !Ref SubnetALB                    # Subnet where the ALB is deployed (must be public to allow internet traffic).
+      Name: NoteStripAppALB                               # Name of the ALB for identification
+      Type: application                                   # Specifies it’s an Application Load Balancer
+      Scheme: internet-facing                             # Accessible from the internet (public-facing)
+      IpAddressType: ipv4                                 # Uses IPv4 addressing
+      Subnets:                                            # ALB must span at least 2 public subnets
+        - !Ref SubnetALB1
+        - !Ref SubnetALB2
+      SecurityGroups:                                     # Security group controlling inbound/outbound traffic
+        - !Ref ALBSecurityGroup
+      LoadBalancerAttributes:                             # Configures additional ALB settings
+        - Key: idle_timeout.timeout_seconds
+          Value: "60"                                     # Time (seconds) before closing idle connections
+        - Key: deletion_protection.enabled
+          Value: "false"                                  # Prevent accidental deletion (disabled here)
       Tags:
-        - Key: Name                         # AWS tag for easier management and identification.
-          Value: NoteStripALB
+        - Key: Name
+          Value: NoteStripALB                             # Tag for easier identification
 
-  # ALB Listener (listens on port 80 and forwards to Target Group)
-  # The ALB needs a listener to "listen" on a port (here HTTP 80) and forward requests to the Target Group.
-  # Only listen to HTTP for now because there's no certificate yet
-  ALBListener:
+  ##########################################################################
+  #                                                                        #
+  #                     ALB Listener (HTTP)                                #
+  #                                                                        #
+  ##########################################################################
+  # A rule inside the ALB that listens on port 80 for HTTP traffic.
+  # For every request coming in, it forwards it to the Target Group, which then sends it to one of the EC2 instances.
+  NoteStripALBListenerHTTP:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      LoadBalancerArn: !Ref ApplicationLoadBalancer  # Links this listener to the Application Load Balancer above.
-      Port: 80                               # Port where the ALB listens for incoming traffic (HTTP).
-      Protocol: HTTP                          # Protocol for incoming traffic.
-      DefaultActions:
-        - Type: forward                       # Action: forwards traffic to a target group.
-          TargetGroupArn: !Ref AppTargetGroup  # Target group where ALB sends traffic after receiving requests.
+      LoadBalancerArn: !Ref NoteStripALB                     # The ALB this listener is attached to
+      Port: 80                                               # Listens for HTTP traffic on port 80
+      Protocol: HTTP                                         # Protocol for this listener
+      DefaultActions:                                        # What to do with requests that don’t match any rule
+        - Type: forward                                      # Forward traffic to a target group
+          TargetGroupArn: !Ref NoteStripTargetGroup           # The target group to forward to
 
+  # Flow Summary
+  # User hits ALB → Listener receives HTTP request → ALB checks Target Group for healthy EC2 → Sends traffic to one of the EC2 servers →
+  # Auto Scaling Group manages adding/removing EC2 servers using the Launch Template → Every new EC2 is automatically put into the Target Group.
+
+  ##########################################################################
+  #                                                                        #
+  #                     CloudWatch Log Group                               #
+  #                                                                        #
+  ##########################################################################
+  NoteStripLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /notestrip/app/logs     # Log group name
+      RetentionInDays: 14                   # Keep logs for 14 days
