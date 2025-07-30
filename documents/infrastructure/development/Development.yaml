@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Development Infrastructure for my personal projects'
+Parameters:
+  DBPassword:
+    Type: String
+    Description: "The master password for the NoteStrip RDS database"
+    NoEcho: true                                # Hides the password in console and logs
+    MinLength: 8                                # Optional security requirement
+    MaxLength: 41
+    AllowedPattern: "^[a-zA-Z0-9@#$%^&+=]*$"     # Allows common special characters
+    ConstraintDescription: "Password must be 8–41 characters and cannot contain '/', '@', '\"', or spaces."
+    
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-xxxxxxxx
+    Description: "Default VPC ID for the RDS instance"
+
+Resources:
+  DevNoteStripRDSInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: personal-projects
+      AllocatedStorage: 10
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      EngineVersion: "8.0.35"
+      MasterUsername: admin
+      MasterUserPassword: !Ref DBPassword
+      MultiAZ: false
+      StorageEncrypted: false
+      BackupRetentionPeriod: 1
+      PubliclyAccessible: true
+      VPCSecurityGroups:
+        - !Ref DevRDSSecurityGroup
+      DBParameterGroupName: !Ref DevDBParameterGroup
+      DeletionProtection: false
+      Tags:
+        - Key: Name
+          Value: personal-project-db
+
+  # Parameter group for Dev RDS
+  DevDBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: "Parameter group for my personal project's DB"
+      Family: "mysql8.0"
+      Parameters:
+        time_zone: "US/Central"
+        event_scheduler: "ON"
+      Tags:
+        - Key: Name
+          Value: personal-project-db-pg
+
+  # Security group allowing public access (dev only)
+  DevRDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow public MySQL access for Dev RDS
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0                     # Open to world (dev only)
+      Tags:
+        - Key: Name
+          Value: personal-project-db-sg
