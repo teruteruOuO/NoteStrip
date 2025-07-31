@@ -7,6 +7,7 @@ import morgan from 'morgan';
 
 // import routes
 import test from './routes/test';
+import signup from './routes/sign-up';
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/test', test);
+app.use('/api/sign-up', signup);
 app.use(errorHandler); // Global error handler (should be after routes)
 
 export default app;

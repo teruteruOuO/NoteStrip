@@ -1,0 +1,16 @@
+.feedback.success, .feedback .success {
+    color: green;
+}
+
+.feedback.fail, .feedback .fail {
+    color: red;
+}
+
+tr.selectable:hover {
+    background-color: pink;
+    cursor: pointer;
+}
+
+.component {
+    border: 1px solid black;
+}

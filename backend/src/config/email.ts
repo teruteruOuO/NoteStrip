@@ -20,11 +20,18 @@ export class EmailConfiguration {
     // Instance-specific properties
     private mailOptions: IMailOptions;
 
-    constructor(to: string, subject: string) {
+    /**
+     * @param to Recipient's email
+     * @param subject Email subject
+     * @param contentType Specify 'text' or 'html'
+     * @param content The actual message content
+     */
+    constructor(to: string, subject: string, contentType: 'text' | 'html', content: string) {
         this.mailOptions = {
             from: `"NoteStrip" <${process.env.NODEMAILER_EMAIL}>`,
             to,
-            subject
+            subject,
+            ...(contentType === 'text' ? { text: content } : { html: content })
         };
     }
 
