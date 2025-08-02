@@ -36,6 +36,7 @@
 import axios from 'axios';
 import { useSignupStore } from '@/stores/sign-up';
 import { reactive, computed } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 
 const signup = useSignupStore();
 const feedback = reactive({ message: '', success: false });
@@ -85,8 +86,21 @@ const signupUser = async() => {
         }
 
         const response = await axios.post('/api/sign-up', body);
-        console.log(`${response.data.message}. Response information:`);
-        console.log(response);
+        alert(response.data.message);
+        console.log(response.data.message);
+        console.log(`Response data information:`, response);
+
+        // Reset the signup form
+        signup.resetSignup();
+        signup.signup.email = response.data.email; // Store the email in the local storage for the meantime
+
+        // Switch from this component to VerifyCodeComponent.vue
+        signup.component.signup_form = false;
+        signup.component.verification_form = true;
+
+        // Start the timer for SignupTimerComponent.vue for 600 seconds
+        signup.component.timer.start = true;
+        signup.component.timer.time_left = 600;
 
     } catch (error) {
         console.error(`An error occured while signing up the user's information`);
@@ -94,7 +108,7 @@ const signupUser = async() => {
 
         // Handle errors returned from the backend
         if (error.response) {
-            console.error("Backend error:", error.response.data);
+            console.error("Backend error:", error.response);
             feedback.message = error.response.data.message;
 
         // Handle unexpected errors
@@ -109,4 +123,9 @@ const signupUser = async() => {
     }
 }
 
+// Reset sign-up pinia store ONLY if switching to another route
+onBeforeRouteLeave(() => {
+    signup.resetComponent();
+    signup.resetSignup();
+})
 </script>

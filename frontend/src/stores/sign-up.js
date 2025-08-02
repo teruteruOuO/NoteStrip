@@ -7,9 +7,15 @@ export const useSignupStore = defineStore('sign-up', () => {
 		password: '',
 		confirm_password: '',
 		verification_code: '',
+	});
+
+	const component = reactive({
+		signup_form: true,
+		verification_form: false,
 		timer: {
+			time_left: 0,
 			start: false,
-			key: 0
+			id: 0
 		}
 	});
 
@@ -18,9 +24,15 @@ export const useSignupStore = defineStore('sign-up', () => {
 		signup.password = '';
 		signup.confirm_password = '';
 		signup.verification_code = '';
-		signup.timer.start = false;
-		signup.timer.key = 0;
 	}
 
-	return { signup, resetSignup }
+	const resetComponent = () => {
+		component.signup_form = true;
+		component.verification_form = false,
+		component.timer.time_left = 0,
+		component.timer.start = false
+		component.timer.id = 0;
+	}
+
+	return { signup, component, resetSignup, resetComponent }
 }, { persist: { enabled: true } });
