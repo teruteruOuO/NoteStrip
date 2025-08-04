@@ -8,6 +8,9 @@ export class LoginConfiguration {
     // Instance-specific properties
     private maxAge: number;
 
+    /**
+     * @param maxAge The login token's max age (how long they can stay logged in)
+     */
     constructor(maxAge: number) {
         this.maxAge = maxAge
     }

@@ -6,8 +6,8 @@ import { errorHandler } from './middlewares/error-handler';
 import morgan from 'morgan';
 
 // import routes
-import test from './routes/test';
 import signup from './routes/sign-up';
+import authentication from './routes/authentication';
 
 const app = express();
 
@@ -18,8 +18,8 @@ app.use(cookieParser()); // Parse cookies from requests
 app.use(express.json());
 
 // Routes
-app.use('/api/test', test);
 app.use('/api/sign-up', signup);
+app.use('/api/authentication', authentication);
 app.use(errorHandler); // Global error handler (should be after routes)
 
 export default app;

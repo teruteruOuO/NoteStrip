@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" version="28.0.7" pages="2">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" version="28.0.7" pages="3">
   <diagram name="Template" id="4rOthq3Gf1K_89cz8c5n">
     <mxGraphModel dx="983" dy="517" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -32,7 +32,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="GrjKJN1eVeqFFK_vbXTj" name="Signup">
-    <mxGraphModel dx="1188" dy="624" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="983" dy="517" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -485,8 +485,161 @@
         <mxCell id="VgkMEO1kLpNmpeZe7qDu-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="-vOv8EdUpsXwApuLi9UZ-13" target="VgkMEO1kLpNmpeZe7qDu-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SQ588mH9OKobH3iXKGie-2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
-          <mxGeometry x="160" y="1320" width="60" height="30" as="geometry" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="BKDuSxLe7ngh_wln4YvJ" name="Login">
+    <mxGraphModel dx="1426" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="KqpBuHqfusiyPBuevMVH-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="zL70C0Kgi79n6Qd2Ap8d-1" target="KqpBuHqfusiyPBuevMVH-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zL70C0Kgi79n6Qd2Ap8d-1" value="User goes to the Login page" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;gradientColor=none;" parent="1" vertex="1">
+          <mxGeometry x="40" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Dr0FS8kuxdz5uIG9M5V5-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="KqpBuHqfusiyPBuevMVH-1" target="Dr0FS8kuxdz5uIG9M5V5-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KqpBuHqfusiyPBuevMVH-1" value="User enters their email and password" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="240" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="nTCxz6Hy-ZdJHS8u3uri-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Dr0FS8kuxdz5uIG9M5V5-2" target="nTCxz6Hy-ZdJHS8u3uri-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Dr0FS8kuxdz5uIG9M5V5-2" value="Frontend sends the form to the backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="440" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="nTCxz6Hy-ZdJHS8u3uri-1" value="Backend verifies user token and form" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="640" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-4" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="seYIbMSzjhHxaV1ljBei-1" target="seYIbMSzjhHxaV1ljBei-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-7" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=0;entryPerimeter=0;" parent="1" source="seYIbMSzjhHxaV1ljBei-1" target="seYIbMSzjhHxaV1ljBei-8" edge="1">
+          <mxGeometry x="-0.8586" relative="1" as="geometry">
+            <mxPoint x="440" y="280" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="120" y="370" />
+              <mxPoint x="420" y="370" />
+              <mxPoint x="420" y="280" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-1" value="Is user logged in?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#B8F4BC;fillColor=#2A3652;" parent="1" vertex="1">
+          <mxGeometry x="40" y="215" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="seYIbMSzjhHxaV1ljBei-2" target="KqpBuHqfusiyPBuevMVH-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-2" value="Frontend sends a warning message" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="240" y="240" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;curved=0;" parent="1" source="nTCxz6Hy-ZdJHS8u3uri-1" target="seYIbMSzjhHxaV1ljBei-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="160" />
+              <mxPoint x="120" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-9" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;curved=0;" parent="1" source="seYIbMSzjhHxaV1ljBei-8" target="seYIbMSzjhHxaV1ljBei-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="200" />
+              <mxPoint x="360" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-2" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="seYIbMSzjhHxaV1ljBei-8" target="oi0EYIQ2qTs0jM5qpI2C-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="seYIbMSzjhHxaV1ljBei-8" value="Is email and password in request body?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#B8F4BC;fillColor=#2A3652;" parent="1" vertex="1">
+          <mxGeometry x="440" y="215" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-1" value="Find the email in the database" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="640" y="240" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-6" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;curved=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-3" target="seYIbMSzjhHxaV1ljBei-2" edge="1">
+          <mxGeometry x="-0.4286" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="480" />
+              <mxPoint x="230" y="350" />
+              <mxPoint x="320" y="350" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-7" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;curved=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-3" target="oi0EYIQ2qTs0jM5qpI2C-4" edge="1">
+          <mxGeometry x="-0.6981" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-3" value="Does the email exist in the database?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#B8F4BC;fillColor=#2A3652;" parent="1" vertex="1">
+          <mxGeometry x="40" y="415" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-4" value="Compare hashed password to request body password" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="240" y="440" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;curved=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-1" target="oi0EYIQ2qTs0jM5qpI2C-3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="400" />
+              <mxPoint x="120" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-11" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;curved=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-9" target="seYIbMSzjhHxaV1ljBei-2" edge="1">
+          <mxGeometry x="-0.6471" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="390" />
+              <mxPoint x="360" y="390" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-14" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-9" target="oi0EYIQ2qTs0jM5qpI2C-12" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-9" value="Do the passwords match?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#B8F4BC;fillColor=#2A3652;" parent="1" vertex="1">
+          <mxGeometry x="440" y="415" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-4" target="oi0EYIQ2qTs0jM5qpI2C-9" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-16" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-12" target="oi0EYIQ2qTs0jM5qpI2C-15" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="580" />
+              <mxPoint x="120" y="580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-12" value="Make a temporary token for the user" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="640" y="440" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-15" target="oi0EYIQ2qTs0jM5qpI2C-17" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-15" value="Log the login action" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="600" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-17" target="oi0EYIQ2qTs0jM5qpI2C-19" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-17" value="Send the user&#39;s ID as JSON to frontend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="240" y="600" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-19" value="Frontend stores the ID in the local storage" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="440" y="600" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-21" value="Reroute to the Dashboard page" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;gradientColor=none;" parent="1" vertex="1">
+          <mxGeometry x="640" y="600" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="oi0EYIQ2qTs0jM5qpI2C-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="oi0EYIQ2qTs0jM5qpI2C-19" target="oi0EYIQ2qTs0jM5qpI2C-21" edge="1">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

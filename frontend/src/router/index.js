@@ -19,6 +19,17 @@ const router = createRouter({
 			name: 'sign-up',
 			component: () => import('../views/SignupView.vue'),
 		},
+		{
+			path: '/login',
+			name: 'login',
+			component: () => import('../views/LoginView.vue'),
+		},
+		{
+			path: '/dashboard',
+			name: 'dashboard',
+			meta: { requiresAuth: true },
+			component: () => import('../views/DashboardView.vue'),
+		},
 	],
 });
 

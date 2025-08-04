@@ -36,6 +36,15 @@ export const signupUser = async (req: Request, res: Response, next: NextFunction
         }
         console.log(`User is not logged in nor currently has valid token. Success!`);
 
+        console.log(`Checking if email and password exist...`);
+        if (!email || !password) {
+            error = new Error(`Unable to find email or password in the request body`);
+            error.status = 404;
+            error.frontend_message = 'Email and password must exist before verifying your code'
+            throw error;
+        }
+        console.log(`email (${email}) and password are found!`);
+
         // Neutralize email
         console.log(`Neutralizing email and setting up user nickname...`);
         email = neutralizeString(email, true);

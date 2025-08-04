@@ -166,7 +166,7 @@ const verifyVerificationCode = async () => {
         await Promise.resolve(signup.resetComponent());
 
         // Navigate only after clearing data
-        router.push({ name: 'home' });
+        router.push({ name: 'login' });
 
     } catch (error) {
         console.error(`An error occured while verifying the submitted code`);
