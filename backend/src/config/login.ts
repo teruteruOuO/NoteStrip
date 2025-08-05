@@ -4,6 +4,7 @@ dotenv.config();
 
 export class LoginConfiguration {
     public static readonly jwtSecret: string = process.env.JWT_SECRET || 'none';
+    public static readonly passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     // Instance-specific properties
     private maxAge: number;

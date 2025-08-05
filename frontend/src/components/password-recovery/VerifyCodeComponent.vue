@@ -1,6 +1,6 @@
 <template>
 <section id="verify-code" class="component">
-    <SignupTimerComponent v-if="signup.component.timer.start" :key="signup.component.timer.id"/>
+    <PasswordRecoveryTimerComponent v-if="passwordRecovery.component.timer.start" :key="passwordRecovery.component.timer.id"/>
 
     <form @submit.prevent="verifyVerificationCode">
         <ul>
@@ -10,7 +10,7 @@
                 type="text" 
                 name="verification-code" 
                 id="verification-code" 
-                v-model="signup.signup.verification_code" 
+                v-model="passwordRecovery.passwordRecovery.verification_code" 
                 min=6 
                 max=6 
                 placeholder="required"
@@ -20,12 +20,6 @@
                 <button type="submit" :disabled="isLoading.verify" :class="{ 'button-loading': isLoading.verify }">
                     <span v-if="!isLoading.verify">Verify Code</span>
                     <span v-else>Verifying Code...</span>
-                </button>
-            </li>
-            <li>
-                <button type="button" @click="resetEmail" :disabled="isLoading.reset" :class="{ 'button-loading': isLoading.reset }">
-                    <span v-if="!isLoading.reset">Reset Email</span>
-                    <span v-else>Resetting Email...</span>
                 </button>
             </li>
             <li>
@@ -46,81 +40,30 @@
 </template>
 
 <script setup>
-import { useSignupStore } from '@/stores/sign-up';
-import SignupTimerComponent from './SignupTimerComponent.vue';
+import PasswordRecoveryTimerComponent from './PasswordRecoveryTimerComponent.vue';
 import LeaveDetectorComponent from './LeaveDetectorComponent.vue';
+import { usePasswordRecoveryStore } from '@/stores/password-recovery';
 import { reactive } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 
-const signup = useSignupStore();
-const router = useRouter();
+const passwordRecovery = usePasswordRecoveryStore();
+const isLoading = reactive({ verify: false, resend: false });
 const feedback = reactive({ message: '', success: false });
-const isLoading = reactive({
-    reset: false,
-    resend: false,
-    verify: false
-});
-
-// Reset email
-const resetEmail = async () => {
-    isLoading.reset = true;
-
-    // Ask user if they want to proceed
-    const answer = window.confirm("Are you sure you want to reset your email and restart the sign-up process?");
-    if (!answer) {
-        isLoading.reset = false;
-        return;
-    }
-    console.log(`User wants to reset their sign-up process`);
-
-    try {
-        const body = {
-            email: signup.signup.email,
-            reason: 'reset email'
-        }
-        const response = await axios.post('/api/sign-up/reset-progress', body);
-        console.log(response.data.message);
-        console.log(`Response data information:`, response);
-
-        // Reset signup progress
-        signup.resetComponent();
-        signup.resetSignup();
-
-    } catch (error) {
-        console.error(`An error occured while resetting the user's sign-up process`);
-        feedback.success = false;
-
-        // Handle errors returned from the backend
-        if (error.response) {
-            console.error("Backend error:", error.response);
-            feedback.message = error.response.data.message;
-
-        // Handle unexpected errors
-        } else {
-            console.error("Unexpected error:", error.message);
-            feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
-        }
-
-    } finally {
-        isLoading.reset = false;
-    }
-}
 
 // Resend a new verification code
 const resendVerificationCode = async () => {
     isLoading.resend = true;
 
-    try {
-        const response = await axios.post('/api/sign-up/resend-code', { email: signup.signup.email });
+    try { 
+        const response = await axios.post('/api/password-recovery/resend-verification-code', { email: passwordRecovery.passwordRecovery.email });
         console.log(response.data.message);
         console.log(`Response data information:`, response);
 
         // Reset timer
-        signup.component.timer.start = false;
-        signup.component.timer.start = true;
-        signup.component.timer.id++
-        signup.component.timer.time_left = 600;
+        passwordRecovery.component.timer.start = false;
+        passwordRecovery.component.timer.start = true;
+        passwordRecovery.component.timer.id++
+        passwordRecovery.component.timer.time_left = 600;
 
         feedback.success = true;
         feedback.message = response.data.message;
@@ -145,30 +88,32 @@ const resendVerificationCode = async () => {
     }
 }
 
-// Verify the form
+// Verify verification code
 const verifyVerificationCode = async () => {
     isLoading.verify = true;
 
     try {
         const body = {
-            email: signup.signup.email,
-            verification_code: signup.signup.verification_code
+            email: passwordRecovery.passwordRecovery.email,
+            verification_code: passwordRecovery.passwordRecovery.verification_code
         }
-        const response = await axios.post('/api/sign-up/verify-code', body);
+        const response = await axios.post('/api/password-recovery/verify-verification-code', body);
         console.log(response.data.message);
         console.log(`Response data information:`, response);
 
         alert(response.data.message);
 
-        // Ensure store is reset before navigation
-        await Promise.resolve(signup.resetSignup());
-        await Promise.resolve(signup.resetComponent());
+        // Reset timers
+        passwordRecovery.component.timer.id = 0;
+        passwordRecovery.component.timer.start = false;
+        passwordRecovery.component.timer.time_left = 0;
 
-        // Navigate only after clearing data
-        router.push({ name: 'login' });
+        // Change component to ChangePasswordComponent
+        passwordRecovery.component.verification_form = false;
+        passwordRecovery.component.password_form = true;
 
     } catch (error) {
-        console.error(`An error occured while verifying the submitted code`);
+        console.error(`An error occured while verifying the verification code of the user`);
         feedback.success = false;
 
         // Handle errors returned from the backend
@@ -184,7 +129,6 @@ const verifyVerificationCode = async () => {
 
     } finally {
         isLoading.verify = false;
-
     }
 }
 </script>

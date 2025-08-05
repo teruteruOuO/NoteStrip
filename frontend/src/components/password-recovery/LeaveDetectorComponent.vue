@@ -6,10 +6,10 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
-import { useSignupStore } from '@/stores/sign-up';
+import { usePasswordRecoveryStore } from '@/stores/password-recovery';
 import axios from 'axios';
 
-const signup = useSignupStore();
+const passwordRecovery = usePasswordRecoveryStore();
 
 function handleBeforeUnload(event) {
     // This event only fires when the user tries to:
@@ -36,7 +36,7 @@ onBeforeUnmount(() => {
 onBeforeRouteLeave(async (to, from, next) => {
     
     // Skip the following lines if there's no existing email in the local storage
-    if (!signup.signup.email) {
+    if (!passwordRecovery.passwordRecovery.email) {
         next();
         return;
     }; 
@@ -44,10 +44,10 @@ onBeforeRouteLeave(async (to, from, next) => {
     // This fires when:
     // - The user navigates to a different route in your Vue app
     // - Using router links or programmatic navigation (router.push, etc.)
-    const answer = window.confirm(`Are you sure you want to leave? Your account will disappear and you'd have to try again.`);
+    const answer = window.confirm(`Are you sure you want to leave? Your proces will reset`);
 
     if (answer) {   // If user says ok
-        await resetProgress('go to another route', next);
+        await resetProgress('cancel', next);
 
     } else {    // If user cancels
         next(false); // Cancel navigation
@@ -58,21 +58,21 @@ onBeforeRouteLeave(async (to, from, next) => {
 const resetProgress = async (reason, next) => {
     try {
         const body = {
-            email: signup.signup.email,
+            email: passwordRecovery.passwordRecovery.email,
             reason: reason
         }
-        const response = await axios.post('/api/sign-up/reset-progress', body);
+        const response = await axios.post('/api/password-recovery/cancel-verification-code', body);
         console.log(response.data.message);
         console.log(`Response data information:`, response);
 
-        // Reset signup progress
-        signup.resetComponent();
-        signup.resetSignup();
+        // Reset password-recovery progress
+        passwordRecovery.resetComponent();
+        passwordRecovery.resetPasswordRecovery();
 
         next(); // Allow navigation
 
     } catch (error) {
-        console.error(`An error occured while resetting the user's information`);
+        console.error(`An error occured while resetting the user's progress`);
 
         // Handle errors returned from the backend
         if (error.response) {

@@ -5,6 +5,7 @@ import { generateCode } from '../miscellaneous/generate-code';
 import { neutralizeString } from '../miscellaneous/neutralize-string';
 import { ITransactionQuery } from '../../types/types';
 import { EmailConfiguration } from '../config/email';
+import { LoginConfiguration } from '../config/login';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 
@@ -20,7 +21,6 @@ export const signupUser = async (req: Request, res: Response, next: NextFunction
         let acctId: number;
         let error: AppError;
         const verificationCode = generateCode(6);
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         const isLoggedIn = req.cookies['token'] ? true : false;
         let emailInstance: EmailConfiguration;
         let transporter = nodemailer.createTransport(EmailConfiguration.systemEmail);
@@ -54,7 +54,7 @@ export const signupUser = async (req: Request, res: Response, next: NextFunction
 
         // Ensure password rule is still followed and not bypassed in the frontend
         console.log(`Checking if user password is still valid...`);
-        if (!passwordRegex.test(password)) {
+        if (!LoginConfiguration.passwordRegex.test(password)) {
             error = new Error(`User provided a weak password`);
             error.status = 400;
             error.frontend_message = "Your password must contain at least one upper case and lowercase letters, one number, and one special character.";

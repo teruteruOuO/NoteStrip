@@ -25,6 +25,11 @@ const router = createRouter({
 			component: () => import('../views/LoginView.vue'),
 		},
 		{
+			path: '/password-recovery',
+			name: 'password-recovery',
+			component: () => import('../views/PasswordRecoveryView.vue'),
+		},
+		{
 			path: '/dashboard',
 			name: 'dashboard',
 			meta: { requiresAuth: true },
