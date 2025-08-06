@@ -84,7 +84,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             LoginConfiguration.jwtSecret, 
             { expiresIn: '8h' }
         );
-        loginInstance = new LoginConfiguration(8 * 60 * 60 * 1000);
+        loginInstance = new LoginConfiguration();
         res.cookie('token', token, loginInstance.getLoginOptions());
         console.log(`Successfully configured ${email}'s login token...`);
 
@@ -114,7 +114,7 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
         let error: AppError;
         let decoded: any;
         let accountInstance: { id: number, email: string };
-        let loginInstance = new LoginConfiguration(8 * 60 * 60 * 1000);
+        let loginInstance = new LoginConfiguration();
 
         console.log(`logoutUser is running...`);
 

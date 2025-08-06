@@ -15,7 +15,8 @@ export const useSignupStore = defineStore('sign-up', () => {
 		timer: {
 			time_left: 0,
 			start: false,
-			id: 0
+			id: 0,
+			clock: 600
 		}
 	});
 

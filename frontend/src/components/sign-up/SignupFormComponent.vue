@@ -100,7 +100,7 @@ const signupUser = async() => {
 
         // Start the timer for SignupTimerComponent.vue for 600 seconds
         signup.component.timer.start = true;
-        signup.component.timer.time_left = 600;
+        signup.component.timer.time_left = signup.component.timer.clock;
 
     } catch (error) {
         console.error(`An error occured while signing up the user's information`);

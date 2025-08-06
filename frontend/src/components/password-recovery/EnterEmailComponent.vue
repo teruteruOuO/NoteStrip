@@ -49,7 +49,7 @@ const sendVerificationCode = async () => {
         // Start the timer for 600 seconds
         passwordRecovery.component.timer.start = true;
         passwordRecovery.component.timer.id++;
-        passwordRecovery.component.timer.time_left = 600;
+        passwordRecovery.component.timer.time_left = passwordRecovery.component.timer.clock;
 
     } catch (error) {
         console.error(`An error occured while sending a verification code to the user`);

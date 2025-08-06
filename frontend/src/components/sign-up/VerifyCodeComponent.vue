@@ -120,7 +120,7 @@ const resendVerificationCode = async () => {
         signup.component.timer.start = false;
         signup.component.timer.start = true;
         signup.component.timer.id++
-        signup.component.timer.time_left = 600;
+        signup.component.timer.time_left = signup.component.timer.clock;
 
         feedback.success = true;
         feedback.message = response.data.message;

@@ -63,7 +63,7 @@ const resendVerificationCode = async () => {
         passwordRecovery.component.timer.start = false;
         passwordRecovery.component.timer.start = true;
         passwordRecovery.component.timer.id++
-        passwordRecovery.component.timer.time_left = 600;
+        passwordRecovery.component.timer.time_left = passwordRecovery.component.timer.clock;
 
         feedback.success = true;
         feedback.message = response.data.message;

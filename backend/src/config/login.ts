@@ -10,9 +10,9 @@ export class LoginConfiguration {
     private maxAge: number;
 
     /**
-     * @param maxAge The login token's max age (how long they can stay logged in)
+     * @param maxAge The login token's max age (how long they can stay logged in) (Default: 8 hrs)
      */
-    constructor(maxAge: number) {
+    constructor(maxAge: number = 8 * 3600000) {
         this.maxAge = maxAge
     }
 
