@@ -20,7 +20,7 @@ export interface ITransactionQuery {
 
 export interface IDecodedTokenPayload {
     id: number;
-    username: string; 
+    email: string; 
     iat: number;
     exp: number;
 }

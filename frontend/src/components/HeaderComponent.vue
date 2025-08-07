@@ -10,6 +10,7 @@
             <li v-if="!user.user.id"><RouterLink :to="{ name: 'login' }">Login</RouterLink></li>
 
             <li v-if="user.user.id"><RouterLink :to="{ name: 'dashboard' }">Dashboard</RouterLink></li>
+            <li v-if="user.user.id"><RouterLink :to="{ name: 'account' }">Account</RouterLink></li>
         </ul>
     </nav>
 </header>

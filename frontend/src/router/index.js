@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { authorizeToken } from '@/helpers/authorize-token';
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
@@ -35,7 +36,30 @@ const router = createRouter({
 			meta: { requiresAuth: true },
 			component: () => import('../views/DashboardView.vue'),
 		},
+		{
+			path: '/account',
+			name: 'account',
+			meta: { requiresAuth: true },
+			component: () => import('../views/AccountView.vue'),
+		},
+		{
+            path: '/:pathMatch(.*)*',
+            redirect: { name: 'home' }
+        }
 	],
 });
+
+// This is triggered each time a user navigates from page to page
+router.beforeEach(async (to, from, next) => {
+    const isValid = await authorizeToken(to.name, to.meta.requiresAuth ? true : false);
+
+    if (isValid) {
+		next();
+	} else {
+		next({ name: 'home'});
+	}
+    
+});
+
 
 export default router;

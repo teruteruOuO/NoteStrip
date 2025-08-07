@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../../types/types';
+import { AppError, IDecodedTokenPayload } from '../../types/types';
 import { DatabaseScript } from '../models/database-script';
 import { LoginConfiguration } from '../config/login';
 import { neutralizeString } from '../miscellaneous/neutralize-string';
@@ -150,6 +150,78 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
         res.clearCookie('token', loginInstance.getLoginOptions());
         res.status(200).json({ message: 'Logout success' });
         
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Verify user's token for each route visit
+export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let error: AppError;
+        let { name, requires_authentication } = req.body as { name: string, requires_authentication: boolean };
+        let userInformation: IDecodedTokenPayload;
+        let newToken: string;
+        let loginInstance: LoginConfiguration;
+        const currentToken = req.cookies['token'] as string;
+
+        console.log(`Processing verifyToken...`);
+
+        console.log(`Checking if the route's name and its metadata is in the request body...`);
+        if (!name || requires_authentication == null) {
+            error = new Error("User accessing this route does not have the route's name or its metadata.");
+            error.status = 404;
+            error.frontend_message = `Route name and its metadata must be given first before you can continue`;
+            throw error;
+        }
+        console.log(`Route name (${name}) and its metadata exist!`);
+
+        // Verify user's token if the route's metadata requires authorization (need to be logged in)
+        // then refresh the token's time limit
+        if (requires_authentication) {
+            // Check if user has a token
+            console.log(`Checking if user has a token (logged in)...`);
+            if (!currentToken) {
+                error = new Error("User does not have a token");
+                error.status = 404;
+                error.frontend_message = `You do not have a token; therefore, you can't continue to the next page`
+                throw error;
+            }
+            console.log(`User has a token!`);
+
+            // Check if the token is actually valid
+            console.log(`Checking if the user's token is valid...`);
+            jwt.verify(currentToken, LoginConfiguration.jwtSecret, (err: any, decodedToken: any) => {
+                if (err) {
+                    error = new Error(`User's token is not valid`);
+                    error.status = 401;
+                    error.frontend_message = `You do not have a token; therefore, you can't continue to the next page`
+                    throw error;
+                }
+
+                userInformation = decodedToken as IDecodedTokenPayload;
+                console.log(`The user's token is valid! The user is ${userInformation.email} (ID: ${userInformation.id})`);
+
+                // Refresh the user's token 
+                console.log(`Refreshing the token for ${userInformation.email}...`);
+                newToken = jwt.sign(
+                    { 
+                        id: userInformation.id, 
+                        email: userInformation.email 
+                    }, 
+                    LoginConfiguration.jwtSecret, 
+                    { expiresIn: '8h' }
+                );
+                loginInstance = new LoginConfiguration();
+                res.cookie('token', newToken, loginInstance.getLoginOptions());
+                console.log(`Successfully refreshed ${userInformation.email}'s login token...`);
+            });
+        }
+
+        console.log(`Route success`);
+        res.status(200).json({ message: `Route to ${name} page success! requiresAuth: ${requires_authentication}`});
+        return;
+
     } catch (err: unknown) {
         next(err);
     }
