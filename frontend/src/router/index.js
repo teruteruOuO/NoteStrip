@@ -43,6 +43,12 @@ const router = createRouter({
 			component: () => import('../views/AccountView/AccountEmailView.vue'),
 		},
 		{
+			path: '/account/password',
+			name: 'account-password',
+			meta: { requiresAuth: true },
+			component: () => import('../views/AccountView/AccountPasswordView.vue'),
+		},
+		{
             path: '/:pathMatch(.*)*',
             redirect: { name: 'home' }
         }

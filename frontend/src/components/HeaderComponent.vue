@@ -18,6 +18,7 @@
     <nav class="account" v-if="route.path.includes('account')">
         <ul>
             <li><RouterLink :to="{ name: 'account-email' }">Email</RouterLink></li>
+            <li><RouterLink :to="{ name: 'account-password' }">Password</RouterLink></li>
         </ul>
     </nav>
 </header>

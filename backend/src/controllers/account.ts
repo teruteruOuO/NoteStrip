@@ -369,3 +369,97 @@ export const verifyVerificationCode = async (req: Request, res: Response, next: 
         next(err);
     }
 }
+
+// Change password
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let selectQuery: string;
+        let transactionQuery: ITransactionQuery[];
+        let resultQuery: any[];
+        let { old_password, new_password } = req.body as { old_password: string, new_password: string };
+        let databasePassword: string;
+        let isPasswordValid: boolean;
+        let userInformation = req.user as IDecodedTokenPayload;
+        let error: AppError;
+
+        console.log(`Processing verifyVerificationCode...`);
+
+        // Ensure old and new passwords are in the request body
+        console.log(`Checking if old and new passwords are in the request body...`);
+        if (!old_password || !new_password) {
+            error = new Error(`${userInformation.email} did not provide old and new passwords in the request body`);
+            error.status = 404;
+            error.frontend_message = "Old and new passwords must be in the request body";
+            throw error;
+        }
+        console.log(`Old and new passwords are found!`);
+
+        // Ensure password rule is still followed by the new password and not bypassed in the frontend
+        console.log(`Checking if ${userInformation.email}'s new password is still valid...`);
+        if (!LoginConfiguration.passwordRegex.test(new_password)) {
+            error = new Error(`${userInformation.email} provided a weak password`);
+            error.status = 400;
+            error.frontend_message = "Your password must contain at least one upper case and lowercase letters, one number, and one special character.";
+            throw error;
+        }
+        console.log(`${userInformation.email}'s new password is valid!`);
+
+        // Retrieve the old password from the database
+        console.log(`Retrieving ${userInformation.email}'s current password from the database...`);
+        selectQuery = "SELECT ACCT_PASSWORD FROM ACCOUNT WHERE ACCT_ID = ?;";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id]);
+        if (resultQuery.length !== 1) {
+            error = new Error(`${userInformation.email}'s password cannot be found in the database`);
+            error.status = 404;
+            error.frontend_message = "Unable to retrieve your password. Please contact the admin immediately";
+            throw error;
+        }
+        databasePassword = resultQuery[0].ACCT_PASSWORD;
+        console.log(`Successfully retrieved ${userInformation.email}'s current password!`);
+
+        // Compare the old password to the one in the database
+        console.log(`Comparing ${userInformation.email}'s old password to the one in the database...`);
+        isPasswordValid = await bcrypt.compare(old_password, databasePassword);
+        console.log(`Password validation result for ${userInformation.email}: ${isPasswordValid}`);
+
+        databasePassword = "";
+        if (!isPasswordValid) {
+            error = new Error(`Given password does not match the database password. Cannot proceed with the login process.`);
+            error.status = 400;
+            error.frontend_message = "Incorrect Password!";
+            throw error;
+        }
+        console.log(`Passwords match!`);
+
+        // Hash the new password
+        console.log(`Hashing the ${userInformation.email}'s new password...`);
+        new_password = await bcrypt.hash(new_password, 10);
+        console.log(`Successfully hashed ${userInformation.email}'s new password`);
+
+        // Update user's password in the database and then log the action
+        console.log(`Updating ${userInformation.email}'s password in the database...`);
+        transactionQuery = [
+            {
+                query: "UPDATE ACCOUNT SET ACCT_PASSWORD = ? WHERE ACCT_ID = ?;",
+                params: [new_password, userInformation.id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [
+                    userInformation.id,
+                    'user',
+                    'User successfully updated their password'
+                ]
+            },
+        ]
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`${userInformation.email} successfully updated their password!`);
+
+        res.status(200).json({ message: `Password change success!` });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+
+}
