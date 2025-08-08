@@ -9,6 +9,7 @@ import morgan from 'morgan';
 import signup from './routes/sign-up';
 import authentication from './routes/authentication';
 import passwordRecovery from './routes/password-recovery';
+import account from './routes/account';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use('/api/sign-up', signup);
 app.use('/api/authentication', authentication);
 app.use('/api/password-recovery', passwordRecovery);
+app.use('/api/account', account);
 app.use(errorHandler); // Global error handler (should be after routes)
 
 export default app;

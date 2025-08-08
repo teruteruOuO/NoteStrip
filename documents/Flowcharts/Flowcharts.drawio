@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" version="28.0.7" pages="5">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" version="28.0.7" pages="6">
   <diagram name="Template" id="4rOthq3Gf1K_89cz8c5n">
     <mxGraphModel dx="983" dy="517" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -1258,6 +1258,423 @@
           <mxGeometry x="640" y="200" width="160" height="80" as="geometry" />
         </mxCell>
         <mxCell id="Bm8b0SZn4a6GBFGmEOng-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="Bm8b0SZn4a6GBFGmEOng-6" target="Yerb7CBVzvqrjxQk-XKJ-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="Qvci8Mji7fMIKWaLcSiG" name="Change-Email">
+    <mxGraphModel dx="1188" dy="624" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wogaqy1AAlURHpjByt5b-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="slNtnQ58njmrm2mkqUqN-1" target="wogaqy1AAlURHpjByt5b-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="slNtnQ58njmrm2mkqUqN-1" value="User goes to the Account Page" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wogaqy1AAlURHpjByt5b-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="wogaqy1AAlURHpjByt5b-1" target="wogaqy1AAlURHpjByt5b-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wogaqy1AAlURHpjByt5b-1" value="Clicks the &quot;Email&quot; link" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="wogaqy1AAlURHpjByt5b-2" target="Nxi757g0kO7Ff2cfaJja-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wogaqy1AAlURHpjByt5b-2" value="Frontend requests user&#39;s email from backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-1" target="Nxi757g0kO7Ff2cfaJja-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="160" />
+              <mxPoint x="120" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-1" value="Backend verifies user token" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-3" target="Nxi757g0kO7Ff2cfaJja-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-3" value="Verify user ID" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-7" target="Nxi757g0kO7Ff2cfaJja-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-7" value="Retrieve user&#39;s email from the token" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="200" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-10" target="Nxi757g0kO7Ff2cfaJja-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-10" value="Frontend shows the email" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="200" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-16" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-13" target="Nxi757g0kO7Ff2cfaJja-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="320" />
+              <mxPoint x="120" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-13" value="User submits their new email" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="200" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-15" target="Nxi757g0kO7Ff2cfaJja-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-15" value="Frontend sends the new email and user ID to backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-21" target="Nxi757g0kO7Ff2cfaJja-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-21" value="Backend verifies user token" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-22" target="Nxi757g0kO7Ff2cfaJja-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-22" value="Verify user ID" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-28" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-25" target="Nxi757g0kO7Ff2cfaJja-27">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="470" />
+              <mxPoint x="120" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-25" value="Verify if the new email is in the request body" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Nxi757g0kO7Ff2cfaJja-27" value="Check if new email already exists" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-4" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-1" target="w0XlvAgb6qYGHAp1YVMR-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-6" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-1" target="w0XlvAgb6qYGHAp1YVMR-5">
+          <mxGeometry x="-0.8901" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="320" y="640" />
+              <mxPoint x="620" y="640" />
+              <mxPoint x="620" y="560" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-1" value="Does new email already exist?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#B8F4BC;fillColor=#2A3652;" vertex="1" parent="1">
+          <mxGeometry x="240" y="495" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="Nxi757g0kO7Ff2cfaJja-27" target="w0XlvAgb6qYGHAp1YVMR-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-3" target="Nxi757g0kO7Ff2cfaJja-13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="500" />
+              <mxPoint x="820" y="500" />
+              <mxPoint x="820" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-3" value="Frontend sends an error" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="520" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-5" target="w0XlvAgb6qYGHAp1YVMR-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="650" />
+              <mxPoint x="120" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-5" value="Generate a verification code for the user, and log it" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="520" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-7" target="w0XlvAgb6qYGHAp1YVMR-11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-7" value="Send the verification code to the user&#39;s new email" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="680" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-11" target="w0XlvAgb6qYGHAp1YVMR-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-11" value="Frontend keeps the new email temporarily and disables the form" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="680" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w0XlvAgb6qYGHAp1YVMR-12" value="A 10-minute timer pops up" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="680" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-4" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-1" target="qVoEWWYzi-JSRW4Lg3e3-3">
+          <mxGeometry x="-0.771" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="800" />
+              <mxPoint x="120" y="800" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-1" value="Did the timer expire?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#2A3652;fillColor=#B8F4BC;" vertex="1" parent="1">
+          <mxGeometry x="640" y="655" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="w0XlvAgb6qYGHAp1YVMR-12" target="qVoEWWYzi-JSRW4Lg3e3-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-3" target="qVoEWWYzi-JSRW4Lg3e3-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-3" value="Frontend sends the user&#39;s ID to the backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="840" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-5" target="qVoEWWYzi-JSRW4Lg3e3-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-5" value="Backend deletes all current verification code for the user" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="840" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-8" value="Frontend sends an error &quot;Resend code&quot;" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="840" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-15" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-10" target="qVoEWWYzi-JSRW4Lg3e3-14">
+          <mxGeometry x="-0.8626" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="960" />
+              <mxPoint x="120" y="960" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-10" value="Did the user Resend a new code?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#2A3652;fillColor=#B8F4BC;" vertex="1" parent="1">
+          <mxGeometry x="640" y="815" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-11" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-1" target="qVoEWWYzi-JSRW4Lg3e3-10">
+          <mxGeometry x="-0.7" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-8" target="qVoEWWYzi-JSRW4Lg3e3-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-14" target="qVoEWWYzi-JSRW4Lg3e3-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-14" value="Frontend sends the user&#39;s ID and new email to the backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1000" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-17" target="qVoEWWYzi-JSRW4Lg3e3-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-17" value="Backend verifies user token" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1000" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-18" target="qVoEWWYzi-JSRW4Lg3e3-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-18" value="Verify user ID" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1000" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-24" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-21" target="qVoEWWYzi-JSRW4Lg3e3-23">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="1100" />
+              <mxPoint x="120" y="1100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-21" value="Verify if new email is in the request body" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1000" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-23" target="qVoEWWYzi-JSRW4Lg3e3-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-23" value="Ensure the new email is still not taken" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1160" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-25" target="qVoEWWYzi-JSRW4Lg3e3-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-25" value="Generate a new verification code, and log it" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1160" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-27" value="Frontend resets the timer" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1160" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-43" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-29" target="qVoEWWYzi-JSRW4Lg3e3-42">
+          <mxGeometry x="-0.94" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="1200" />
+              <mxPoint x="820" y="1440" />
+              <mxPoint x="120" y="1440" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-29" value="Did the user leave the page?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#2A3652;fillColor=#B8F4BC;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1135" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-30" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-10" target="qVoEWWYzi-JSRW4Lg3e3-29">
+          <mxGeometry x="-0.84" relative="1" as="geometry">
+            <mxPoint x="800" y="870" as="sourcePoint" />
+            <mxPoint x="720" y="1124.9999999999998" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="820" y="880" />
+              <mxPoint x="820" y="1110" />
+              <mxPoint x="720" y="1110" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-27" target="qVoEWWYzi-JSRW4Lg3e3-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-33" target="qVoEWWYzi-JSRW4Lg3e3-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-33" value="Frontend sends the ID to the backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1320" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-34" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-29">
+          <mxGeometry x="-0.8931" relative="1" as="geometry">
+            <mxPoint x="120" y="1320" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="720" y="1280" />
+              <mxPoint x="120" y="1280" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-35" target="qVoEWWYzi-JSRW4Lg3e3-38">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-35" value="Backend deletes all active verification code of the user, and log it" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1320" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-38" value="Reset any used local storage variables" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1320" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-40" value="Route user to their destination" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1320" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-38" target="qVoEWWYzi-JSRW4Lg3e3-40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-42" target="qVoEWWYzi-JSRW4Lg3e3-44">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-42" value="User submits the verification code" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1480" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-44" target="qVoEWWYzi-JSRW4Lg3e3-47">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-44" value="Frontend sends the new email and verification code to backend" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1480" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-47" target="qVoEWWYzi-JSRW4Lg3e3-48">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-47" value="Backend verifies user token" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1480" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-52" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-48" target="qVoEWWYzi-JSRW4Lg3e3-51">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="1600" />
+              <mxPoint x="120" y="1600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-48" value="Verify user ID" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1480" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-51" target="qVoEWWYzi-JSRW4Lg3e3-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-51" value="Backend verifies verification code and new email are in request body" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1640" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-53" value="Check database if the verification code matches" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1640" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-59" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-56" target="qVoEWWYzi-JSRW4Lg3e3-58">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-63" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-56" target="qVoEWWYzi-JSRW4Lg3e3-62">
+          <mxGeometry x="-0.8022" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="1760" />
+              <mxPoint x="120" y="1760" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-56" value="Do the verification codes match?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;spacingLeft=15;spacingRight=15;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fontColor=#B8F4BC;fillColor=#2A3652;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1615" width="160" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-53" target="qVoEWWYzi-JSRW4Lg3e3-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-60" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-58" target="qVoEWWYzi-JSRW4Lg3e3-42">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="740" y="1580" />
+              <mxPoint x="120" y="1580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-58" value="Frontend sends an error" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1640" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-62" target="qVoEWWYzi-JSRW4Lg3e3-64">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-62" value="Update the user&#39;s email address in the database" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1800" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-77" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-64" target="qVoEWWYzi-JSRW4Lg3e3-76">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-64" value="Log the action" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1800" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-79" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;curved=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-67" target="qVoEWWYzi-JSRW4Lg3e3-71">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="1920" />
+              <mxPoint x="120" y="1920" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-67" value="AJAX call on email retrieve" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1800" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-71" value="Reset all frontend variables and local storage variables" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1960" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-73" value="New email shows up" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#B8F4BC;fontColor=#2A3652;spacingLeft=10;spacingRight=10;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1960" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-78" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-76" target="qVoEWWYzi-JSRW4Lg3e3-67">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-76" value="Reconfigure the user&#39;s current token to update the new email" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;fontFamily=Poppins;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DPoppins;fillColor=#2A3652;fontColor=#B8F4BC;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="1800" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="qVoEWWYzi-JSRW4Lg3e3-80" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="qVoEWWYzi-JSRW4Lg3e3-71" target="qVoEWWYzi-JSRW4Lg3e3-73">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

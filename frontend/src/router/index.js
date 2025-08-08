@@ -37,10 +37,10 @@ const router = createRouter({
 			component: () => import('../views/DashboardView.vue'),
 		},
 		{
-			path: '/account',
-			name: 'account',
+			path: '/account/email',
+			name: 'account-email',
 			meta: { requiresAuth: true },
-			component: () => import('../views/AccountView.vue'),
+			component: () => import('../views/AccountView/AccountEmailView.vue'),
 		},
 		{
             path: '/:pathMatch(.*)*',

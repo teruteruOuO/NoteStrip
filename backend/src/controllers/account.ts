@@ -1,0 +1,371 @@
+import { Request, Response, NextFunction } from 'express';
+import { AppError, IDecodedTokenPayload, ITransactionQuery } from '../../types/types';
+import { DatabaseScript } from '../models/database-script';
+import { LoginConfiguration } from '../config/login';
+import { neutralizeString } from '../miscellaneous/neutralize-string';
+import { generateCode } from '../miscellaneous/generate-code';
+import { EmailConfiguration } from '../config/email';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+
+// Retrieve Email (Email should be stored from the token)
+export const retrieveEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let error: AppError;
+        const currentToken = req.user as IDecodedTokenPayload;
+        console.log(`Processing retrieveEmail...`);
+
+        console.log(`Retrieving user email from the token...`);
+        if (!currentToken.email) {
+            error = new Error("User email is missing from the token");
+            error.status = 401;
+            error.frontend_message = "Invalid request";
+            throw error;
+        }
+        console.log(`Successfully retrieved email ${currentToken.email} from the user's token!`);
+
+        res.status(200).json({
+            email: currentToken.email,
+            message: `Successfully retrieved email`
+        });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Change Email (Step 1): Send verification code to the user's new email and also store it to the database
+export const sendVerificationCode = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let selectQuery: string;
+        let resultQuery: any[];
+        let error: AppError;
+        let userInformation = req.user as IDecodedTokenPayload;
+        let emailInstance: EmailConfiguration;
+        let transporter = nodemailer.createTransport(EmailConfiguration.systemEmail);
+        let { new_email } = req.body as { new_email: string }
+        const verificationCode = generateCode(6);
+
+        console.log(`Processing sendVerificationCode (Change Email)...`);
+
+        console.log(`Checking if new email is in the request body...`);
+        if (!new_email) {
+            error = new Error("New email is missing from the request body");
+            error.status = 404;
+            error.frontend_message = "You must provide the new email";
+            throw error;
+        }
+        console.log(`Found the email (${new_email})!`);
+
+        // Check if the given email already exists
+        console.log(`Checking to see if the new email is already taken...`);
+        new_email = neutralizeString(new_email, true);
+        selectQuery = "SELECT ACCT_EMAIL FROM ACCOUNT WHERE LOWER(ACCT_EMAIL) = LOWER(?);";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [new_email]);
+        if (resultQuery.length >= 1) {
+            error = new Error(`User (${userInformation.email} #${userInformation.id}) requesting to change their email to ${new_email} failed because ${new_email} already exists in the records`);
+            error.status = 400;
+            error.frontend_message = "Email taken";
+            throw error;
+        }
+        console.log(`Seems like ${new_email} hasn't been taken yet. Success!`);
+
+        // Store the verification code to the user's account
+        console.log(`Storing the verification code to the user's account...`);
+        transactionQuery = [
+            {
+                query: 'DELETE FROM VERIFICATION_CODE WHERE ACCT_ID = ?;',
+                params: [userInformation.id]
+            },
+            {
+                query: 'INSERT INTO VERIFICATION_CODE (ACCT_ID, CODE_CONTENT) VALUES (?, ?);',
+                params: [userInformation.id, verificationCode]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [
+                    userInformation.id,
+                    'user',
+                    'User initiated a change email process'
+                ]
+            }
+        ]
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully stored the verification code to the user's account!`);
+
+        // Send the verification code to the user's new email
+        console.log(`Sending the verification code to the user's new email address: ${new_email}`);
+        emailInstance = new EmailConfiguration(
+            new_email, 
+            "Account: Change Email Verification Code", 
+            "html",
+            `Your one time code is: <b>${verificationCode}</b><br />This code will expire in 10 minutes, so use it immediately to verify your new email address.` 
+        );
+
+        transporter.sendMail(emailInstance.getMailOptions(), (err, info) => {
+            if (err) {
+                error = new Error(`A mailer error occured while sending the code to the user's new email (${new_email})...`);
+                error.status = 500;
+                error.frontend_message = "A server error occured with the mailer while sending the verification code to your email. Please try again";
+                throw error;
+
+            } else {
+                console.log(`Successfully sent the verification code to the user's new email (${new_email})`);
+                res.status(200).json({ 
+                    message: `Successfully sent the verification code to ${new_email}. Check your email for the code (You might have to check in your spam folder if possible)`,
+                    email: new_email
+                });
+                return;
+            }
+        });
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Change Email (Step: Timer expires or user cancels the process): Triggers when the timer reaches 00:00
+export const cancelChangeEmailProcess = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let resultQuery: any[];
+        let userInformation = req.user as IDecodedTokenPayload
+        let { reason } = req.body as { reason: 'expire' | 'cancel' }
+        let databaseLog: {
+            type: 'system' | 'user',
+            description: string,
+            frontend_message: string
+        }
+        let error: AppError;
+
+        console.log(`Processing cancelChangeEmailProcess (Change Email)...`);
+
+        // Ensure a reason exists
+        console.log(`Checking if a reason exists in the request body`);
+        if (!reason) {
+            error = new Error("User did not provide a reason for cancelling email process");
+            error.status = 404;
+            error.frontend_message = "A reason must be provided";
+            throw error;
+        }
+        console.log(`Reason found for cancelling the change email process (${reason})`);
+
+        // Delete all existing verification code for the user
+        console.log(`Removing all verification codes for user ${userInformation.email} (#${userInformation.id})`);
+        databaseLog = {
+            type: reason === 'expire' ? 'system' : 'user',
+            description: reason === 'expire' ? "Verification code expired during the change email process" : "User cancelled their change email process",
+            frontend_message: reason === 'expire' ? "Verification code expired. Please resend a new one" : "Successfully cancelled change email process"
+        }
+        transactionQuery = [
+            {
+                query: "DELETE FROM VERIFICATION_CODE WHERE ACCT_ID = ?;",
+                params: [userInformation.id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [
+                    userInformation.id,
+                    databaseLog.type,
+                    databaseLog.description
+                ]
+            }
+        ]
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully deleted all verification codes for user ${userInformation.email} because of this reason: ${reason}`);
+
+        res.status(200).json({ message: databaseLog.frontend_message });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Change Email (Step: Resend a new verification code)
+export const resendVerificationCode = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let selectQuery: string;
+        let resultQuery: any[];
+        let error: AppError;
+        let { new_email } = req.body as { new_email: string };
+        let userInformation = req.user as IDecodedTokenPayload;
+        let emailInstance: EmailConfiguration;
+        let transporter = nodemailer.createTransport(EmailConfiguration.systemEmail);
+        const verificationCode = generateCode(6);
+
+        console.log(`Processing resendVerificationCode (Change Email)...`);
+
+        // Ensure a new email exists in the request body
+        console.log(`Checking if a new email exists in the request body`);
+        if (!new_email) {
+            error = new Error("User did not provide the new email in the request body");
+            error.status = 404;
+            error.frontend_message = "The new email must be provided";
+            throw error;
+        }
+        console.log(`New email found (${new_email})!`);
+
+        // Check and see if the new email is still not taken
+        new_email = neutralizeString(new_email, true);
+        console.log(`Checking to see if ${new_email} is still not taken...`);
+        selectQuery = "SELECT ACCT_EMAIL FROM ACCOUNT WHERE LOWER(ACCT_EMAIL) = LOWER(?);";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [new_email]);
+        if (resultQuery.length >= 1) {
+            error = new Error(`Seems like ${new_email} is already taken`);
+            error.status = 400;
+            error.frontend_message = `Email ${new_email} is already taken. Please try a new one.`;
+            throw error;
+        }
+        console.log(`Email ${new_email} is still not taken. Success!`);
+
+        // Store the verification code to the user's account
+        console.log(`Storing the new verification code to the user's account...`);
+        transactionQuery = [
+            {
+                query: 'DELETE FROM VERIFICATION_CODE WHERE ACCT_ID = ?;',
+                params: [userInformation.id]
+            },
+            {
+                query: 'INSERT INTO VERIFICATION_CODE (ACCT_ID, CODE_CONTENT) VALUES (?, ?);',
+                params: [userInformation.id, verificationCode]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [
+                    userInformation.id,
+                    'user',
+                    'User resent a new verification code during email change process'
+                ]
+            }
+        ]
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully stored the new verification code to the user's account!`);
+
+        // Send the verification code to the user's new email
+        console.log(`Sending the new verification code to the user's new email address: ${new_email}`);
+        emailInstance = new EmailConfiguration(
+            new_email, 
+            "Account: Change Email Resend Verification Code", 
+            "html",
+            `Your new one time code is: <b>${verificationCode}</b><br />This code will expire in 10 minutes, so use it immediately to verify your new email address.` 
+        );
+
+        transporter.sendMail(emailInstance.getMailOptions(), (err, info) => {
+            if (err) {
+                error = new Error(`A mailer error occured while sending the code to the user's new email (${new_email})...`);
+                error.status = 500;
+                error.frontend_message = "A server error occured with the mailer while sending the verification code to your email. Please try again";
+                throw error;
+
+            } else {
+                console.log(`Successfully resent the new verification code to the user's new email (${new_email})`);
+                res.status(200).json({ 
+                    message: `Successfully resent the new verification code to ${new_email}. Check your email for the code (You might have to check in your spam folder if possible)`,
+                    email: new_email
+                });
+                return;
+            }
+        });
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Change Email (Step 2: Verify the provided verification code)
+export const verifyVerificationCode = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let selectQuery: string;
+        let resultQuery: any[];
+        let nickname: string;
+        let error: AppError;
+        let userInformation = req.user as IDecodedTokenPayload;
+        let newToken: string;
+        let loginInstance: LoginConfiguration;
+        let { new_email, verification_code } = req.body as { new_email: string, verification_code: string };
+
+        console.log(`Processing verifyVerificationCode (Change Email)...`);
+
+        // Ensure a new email and verification code exist in the request body
+        console.log(`Checking if new email and verification code exist in the request body`);
+        if (!new_email) {
+            error = new Error("User did not provide either the new email or verification code in the request body");
+            error.status = 404;
+            error.frontend_message = "The new email and verification code must be provided";
+            throw error;
+        }
+        console.log(`New email (${new_email}) and verification code found!!`);
+
+        // Compare the provided verification code to the one in the database
+        console.log(`Comparing ${userInformation.email}'s given verification code to the one in the database...`);
+        selectQuery = `SELECT A.ACCT_ID, ACCT_EMAIL, CODE_CONTENT
+                        FROM ACCOUNT A
+                        JOIN VERIFICATION_CODE C
+                        ON A.ACCT_ID = C.ACCT_ID
+                        WHERE ACCT_EMAIL = ?
+                        AND CODE_CONTENT = ?
+                        AND CODE_CREATED < CODE_EXPIRATION;`
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.email, verification_code]);
+
+        if (resultQuery.length !== 1) {
+            error = new Error(`${userInformation.email}'s given verification code ${verification_code} does not match the one stored in the database`);
+            error.status = 400;
+            error.frontend_message = 'Invalid verification code'
+            throw error;
+        }
+        console.log(`${userInformation.email}'s provided verification code (${verification_code}) matches the valid one in the database!`);
+
+        // Update the user's email in the database
+        new_email = neutralizeString(new_email, true);
+        nickname = new_email.split("@")[0] // takes the string before the @ from the email
+        console.log(`Updating user ${userInformation.email}'s email to ${new_email} in the database...`);
+        transactionQuery = [
+            {
+                query: "UPDATE ACCOUNT SET ACCT_EMAIL = ?, ACCT_NICKNAME = ? WHERE ACCT_ID = ?;",
+                params: [new_email, nickname, userInformation.id]
+            },
+            {
+                query: "DELETE FROM VERIFICATION_CODE WHERE ACCT_ID = ?;",
+                params: [userInformation.id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [
+                    userInformation.id,
+                    'user',
+                    'User successfully verified their new email'
+                ]
+            }
+        ]
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully updated user ${userInformation.email}'s email to ${new_email}!`);
+
+        // Update login (token) configuration
+        console.log(`Configuring a new login token for ${new_email} (previously ${userInformation.email})...`);
+        newToken = jwt.sign(
+            { 
+                id: userInformation.id, 
+                email: new_email 
+            }, 
+            LoginConfiguration.jwtSecret, 
+            { expiresIn: '8h' }
+        );
+        loginInstance = new LoginConfiguration();
+        res.cookie('token', newToken, loginInstance.getLoginOptions());
+        console.log(`Successfully configured ${new_email}'s (previously ${userInformation.email}) new login token...`);
+
+        res.status(200).json({
+            message: `Successfully updated email address!`,
+        });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}

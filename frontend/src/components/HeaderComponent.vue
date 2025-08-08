@@ -10,7 +10,14 @@
             <li v-if="!user.user.id"><RouterLink :to="{ name: 'login' }">Login</RouterLink></li>
 
             <li v-if="user.user.id"><RouterLink :to="{ name: 'dashboard' }">Dashboard</RouterLink></li>
-            <li v-if="user.user.id"><RouterLink :to="{ name: 'account' }">Account</RouterLink></li>
+            <li v-if="user.user.id"><RouterLink :to="{ name: 'account-email' }">Account</RouterLink></li>
+        </ul>
+    </nav>
+    
+    <!-- Show only when route contains the string "account" -->
+    <nav class="account" v-if="route.path.includes('account')">
+        <ul>
+            <li><RouterLink :to="{ name: 'account-email' }">Email</RouterLink></li>
         </ul>
     </nav>
 </header>
@@ -18,8 +25,9 @@
 
 
 <script setup>
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 
 const user = useUserStore();
+const route = useRoute();
 </script>
