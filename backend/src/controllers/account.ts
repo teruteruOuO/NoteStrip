@@ -463,3 +463,87 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     }
 
 }
+
+// Retrieve activity logs for a user with pagination
+export const retrieveActivityLogs = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let selectQuery: string;
+        let resultQuery: any[];
+        let userInformation = req.user as IDecodedTokenPayload;
+        let activityLogs: { 
+            id: number, 
+            type: `user` | `system`,
+            description: string,
+            timestamp: string
+        }[];
+        let error: AppError;
+        let totalLogs: number;
+        const logsPerPage = 30;                                     // page size
+        const page = parseInt(req.query.page as string) || 1;       /* ?page=... (defaults to 1) */
+        const offset = (page - 1) * logsPerPage;                    // how many rows to skip
+
+        console.log(`Processing retrieveActivityLogs...`);
+        console.log(`Retrieving page ${page} of ${userInformation.email}'s activity logs...`);
+
+        // Total log count for pagination (Count total rows for page count)
+        console.log(`Determining the total log count for ${userInformation.email}'s pagination...`);
+        selectQuery = "SELECT COUNT(*) AS total FROM ACTIVITY_LOG WHERE ACCT_ID = ?;";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id]);
+        if (resultQuery.length <= 0) {
+            error = new Error(`Unable to determine ${userInformation.email}'s total log count for pagination`);
+            error.status = 404;
+            error.frontend_message = "Unable to find activity logs";
+            throw error;
+        }
+        totalLogs = resultQuery[0]?.total || 0;
+        console.log(`Successfully determined ${userInformation.email}'s total log count for pagination: ${totalLogs}`);
+
+        // Retrieve activity logs (Fetch just one page)
+        console.log(`Retrieving ${userInformation.email}'s activity logs from the database...`);
+        selectQuery = `SELECT 
+                        LOG_ID, 
+                        LOG_TYPE, 
+                        LOG_DESCRIPTION, 
+                        DATE_FORMAT(LOG_TIMESTAMP, '%l:%i %p %M %e, %Y') AS LOG_TIMESTAMP
+                    FROM ACTIVITY_LOG 
+                    WHERE ACCT_ID = ? 
+                    ORDER BY LOG_ID DESC 
+                    LIMIT ? OFFSET ?;`;
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id, logsPerPage, offset]);
+        if (resultQuery.length <= 0) {
+            error = new Error(`Unable to find ${userInformation.email}'s activity logs`);
+            error.status = 404;
+            error.frontend_message = "Unable to find activity logs";
+            throw error;
+        }
+        console.log(`Found ${userInformation.email}'s activity logs!`);
+
+        // Store this in activitylogs array
+        activityLogs = resultQuery.map(log => {
+            return {
+                id: log.LOG_ID,
+                type: log.LOG_TYPE,
+                description: log.LOG_DESCRIPTION,
+                timestamp: log.LOG_TIMESTAMP
+            }
+        });
+
+        // Respond with data + pagination metadata
+        /* 
+        The count gives you total pages; 
+        LIMIT/OFFSET returns only the slice you need; 
+        The response bundles both the data and the “pager math” so the frontend can render controls.
+        */
+        res.status(200).json({
+            message: `Successfully retrieved activity logs (Page ${page} of ${Math.ceil(totalLogs / logsPerPage)})`,
+            activity_logs: activityLogs,
+            total_logs: totalLogs,
+            total_pages: Math.ceil(totalLogs / logsPerPage),
+            current_page: page
+        });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}

@@ -10,13 +10,14 @@
             <li v-if="!user.user.id"><RouterLink :to="{ name: 'login' }">Login</RouterLink></li>
 
             <li v-if="user.user.id"><RouterLink :to="{ name: 'dashboard' }">Dashboard</RouterLink></li>
-            <li v-if="user.user.id"><RouterLink :to="{ name: 'account-email' }">Account</RouterLink></li>
+            <li v-if="user.user.id"><RouterLink :to="{ name: 'account-logs' }">Account</RouterLink></li>
         </ul>
     </nav>
     
     <!-- Show only when route contains the string "account" -->
     <nav class="account" v-if="route.path.includes('account')">
         <ul>
+            <li><RouterLink :to="{ name: 'account-logs' }">Logs</RouterLink></li>
             <li><RouterLink :to="{ name: 'account-email' }">Email</RouterLink></li>
             <li><RouterLink :to="{ name: 'account-password' }">Password</RouterLink></li>
         </ul>

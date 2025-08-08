@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { retrieveEmail, sendVerificationCode, cancelChangeEmailProcess, resendVerificationCode, verifyVerificationCode, changePassword } from "../controllers/account";
+import { retrieveEmail, sendVerificationCode, cancelChangeEmailProcess, resendVerificationCode, verifyVerificationCode, changePassword, retrieveActivityLogs } from "../controllers/account";
 import { authorizeToken } from "../middlewares/authorize-token";
 import { matchUserId } from "../middlewares/match-user-id";
 
@@ -11,5 +11,6 @@ router.post('/email/cancel-verification-code/:acct_id', authorizeToken, matchUse
 router.post('/email/resend-verification-code/:acct_id', authorizeToken, matchUserId, resendVerificationCode);
 router.post('/email/verify-verification-code/:acct_id', authorizeToken, matchUserId, verifyVerificationCode);
 router.post('/password/:acct_id', authorizeToken, matchUserId, changePassword);
+router.get('/activity_logs/:acct_id', authorizeToken, matchUserId, retrieveActivityLogs);
 
 export default router;

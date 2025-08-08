@@ -49,6 +49,12 @@ const router = createRouter({
 			component: () => import('../views/AccountView/AccountPasswordView.vue'),
 		},
 		{
+			path: '/account/logs',
+			name: 'account-logs',
+			meta: { requiresAuth: true },
+			component: () => import('../views/AccountView/AccountLogsView.vue'),
+		},
+		{
             path: '/:pathMatch(.*)*',
             redirect: { name: 'home' }
         }
