@@ -218,7 +218,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
             });
         }
 
-        console.log(`Route success`);
+        console.log(`Route to ${name} page by a user success! requiresAuth: ${requires_authentication}`);
         res.status(200).json({ message: `Route to ${name} page success! requiresAuth: ${requires_authentication}`});
         return;
 

@@ -10,6 +10,7 @@ import signup from './routes/sign-up';
 import authentication from './routes/authentication';
 import passwordRecovery from './routes/password-recovery';
 import account from './routes/account';
+import book from './routes/book';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/sign-up', signup);
 app.use('/api/authentication', authentication);
 app.use('/api/password-recovery', passwordRecovery);
 app.use('/api/account', account);
+app.use('/api/book', book);
 app.use(errorHandler); // Global error handler (should be after routes)
 
 export default app;

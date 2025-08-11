@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'S3 Development Infrastructure for my personal projects'
+
+Resources:
+  # S3 bucket (private)
+  PersonalProjectsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: angel-personal-projects-1989
+      AccessControl: Private
+      # Block all public access (bucket-level)
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins: ["*"]
+            AllowedMethods: ["GET", "HEAD", "PUT"]
+            AllowedHeaders: ["*"]
+            ExposedHeaders: ["ETag", "x-amz-request-id"]  # <-- correct property name
+            MaxAge: 3000
+      Tags:
+        - Key: Name
+          Value: personal-projects-s3
+
+  # Bucket policy to enforce TLS
+  PersonalProjectsS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PersonalProjectsS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: EnforceTLS
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${PersonalProjectsS3Bucket.Arn}"
+              - !Sub "${PersonalProjectsS3Bucket.Arn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  # IAM user for accessing the bucket
+  PersonalProjectsIAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: personal-projects-s3-user
+      Tags:
+        - Key: Name
+          Value: personal-projects-s3-user
+
+  # IAM policy for bucket access
+  PersonalProjectsIAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: PersonalProjectsS3AccessPolicy
+      Users:
+        - !Ref PersonalProjectsIAMUser
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Sub "arn:aws:s3:::angel-personal-projects-1989"
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub "arn:aws:s3:::angel-personal-projects-1989/*"
+
+  # Create access key for the IAM user
+  PersonalProjectsIAMAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref PersonalProjectsIAMUser
+
+Outputs:
+  S3BucketName:
+    Description: "Name of the S3 bucket"
+    Value: !Ref PersonalProjectsS3Bucket
+
+  IAMAccessKeyId:
+    Description: "Access Key ID for the S3 IAM user"
+    Value: !Ref PersonalProjectsIAMAccessKey
+    Export:
+      Name: PersonalProjectsAccessKeyId
+
+  IAMSecretAccessKey:
+    Description: "Secret Access Key for the S3 IAM user (only visible at stack creation)"
+    Value: !GetAtt PersonalProjectsIAMAccessKey.SecretAccessKey
+    Export:
+      Name: PersonalProjectsSecretAccessKey
+
+# What this does:
+#   Creates private S3 bucket with CORS for web access.
+#   Blocks all public access.
+#   Creates IAM user just for this bucket.
+#   Attaches least-privilege policy to that user.
+#   Creates an Access Key and Secret Key for programmatic access (only shown once after stack creation in CloudFormation outputs).

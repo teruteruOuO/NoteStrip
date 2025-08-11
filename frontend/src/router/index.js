@@ -55,6 +55,18 @@ const router = createRouter({
 			component: () => import('../views/AccountView/AccountLogsView.vue'),
 		},
 		{
+			path: '/books',
+			name: 'books',
+			meta: { requiresAuth: true },
+			component: () => import('../views/BooksView/BooksView.vue'),
+		},
+		{
+			path: '/add-book',
+			name: 'add-book',
+			meta: { requiresAuth: true },
+			component: () => import('../views/BooksView/AddBookView.vue'),
+		},
+		{
             path: '/:pathMatch(.*)*',
             redirect: { name: 'home' }
         }

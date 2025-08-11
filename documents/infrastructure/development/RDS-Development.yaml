@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Development Infrastructure for my personal projects'
+Description: 'RDS Personal Infrastructure for my personal projects'
 Parameters:
   DBPassword:
     Type: String
@@ -16,7 +16,8 @@ Parameters:
     Description: "Default VPC ID for the RDS instance"
 
 Resources:
-  DevNoteStripRDSInstance:
+  # RDS Instance
+  PersonalProjectRDSInstance:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Delete
     Properties:
