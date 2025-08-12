@@ -1,20 +1,15 @@
 <template>
 <section id="view-book-note" class="component">
+    <h2>Notes ({{ props.name }} {{ props.bookId }})</h2>
+
     <section class="loader" v-if="isLoading.page">
     </section>
 
     <section class="retrieve-fail feedback fail" v-else-if="!feedback.page.success">
-        <h2>Notes</h2>
         <p>{{ feedback.page.message }}</p>
     </section>
 
-    <section class="retrieve-success empty" v-else-if="notes.length <= 0">
-        <h2>Notes</h2>
-        <p>No notes found. Add one!</p>
-    </section>
-
     <section class="retrieve-success" v-else>
-        <h2>Notes</h2>
         <section class="buttons">
             <button @click="decideToAddNewNote">
                 <span v-if="!newNote.add_state">Add a new note</span>
@@ -49,17 +44,23 @@
             </section>
         </section>
 
-        <section v-for="note in notes" :key="note.id">
-            <p>Title: {{ note.title }}</p>
-            <p>Content: {{ note.content }}</p>
-            <p>Date Added: {{ note.timestamp }}</p>
-            <p>
-                <!-- Button should only be disabled while loading for the selected note -->
-                <button type="button" @click="deleteNote(note.id)" :disabled="isLoading.delete === note.id" :class="{ 'button-loading': isLoading.delete === note.id }">
-                    <span v-if="isLoading.delete !== note.id">Delete Note</span>
-                    <span v-else>Deleting note..</span>
-                </button>
-            </p>
+        <section class="no-lists" v-if="notes.length <= 0">
+            <p>No notes found. Add one!</p>
+        </section>
+
+        <section class="have-lists" v-else>
+            <section v-for="note in notes" :key="note.id">
+                <p>Title: {{ note.title }}</p>
+                <p>Content: {{ note.content }}</p>
+                <p>Date Added: {{ note.timestamp }}</p>
+                <p>
+                    <!-- Button should only be disabled while loading for the selected note -->
+                    <button type="button" @click="deleteNote(note.id)" :disabled="isLoading.delete === note.id" :class="{ 'button-loading': isLoading.delete === note.id }">
+                        <span v-if="isLoading.delete !== note.id">Delete Note</span>
+                        <span v-else>Deleting note..</span>
+                    </button>
+                </p>
+            </section>
         </section>
     </section>
 </section>

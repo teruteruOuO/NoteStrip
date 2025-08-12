@@ -7,14 +7,16 @@
 </template>
 
 <script setup>
+import { toRefs } from 'vue';
 import ViewBookComponent from '@/components/books/update/ViewBookComponent.vue';
 import ViewBookNoteComponent from '@/components/books/update/ViewBookNoteComponent.vue';
 
 // Receives from router because props: true
 const props = defineProps({
-    book_id: { type: String, required: true },
-    name: { type: String, default: '' }, // from query ?name=
-});
+  book_id: { type: [String, Number], required: true },
+  name: { type: String, default: '' },
+})
 
-const { book_id, name } = props;
+// keep reactivity
+const { book_id, name } = toRefs(props)
 </script>

@@ -71,9 +71,9 @@ const router = createRouter({
 			name: 'view-book',
 			meta: { requiresAuth: true },
 			component: () => import('../views/BooksView/ViewBookView.vue'),
-			props: route => ({
-				book_id: String(route.params.book_id),
-				name: route.query.name ? String(route.query.name) : ''
+			props: (route) => ({
+				book_id: route.params.book_id,
+				name: route.query.name ?? ''
 			})
 		},
 		{

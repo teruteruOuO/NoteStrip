@@ -369,6 +369,18 @@ export const retrieveBooksNotes = async (req: Request, res: Response, next: Next
         }
         console.log(`Found the book id in  ${userInformation.email}'s parameter!`);
 
+        // If the book does not exist, throw an error
+        console.log(`Checking if ${book_id} exists for ${userInformation.email}...`);
+        selectQuery = "SELECT BOOK_ID FROM BOOK WHERE BOOK_ID = ? AND ACCT_ID = ?;";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [book_id, userInformation.id]);
+        if (resultQuery.length <= 0) {
+            error = new Error(`${userInformation.email}'s book (#${book_id}) does not exist in the database`);
+            error.status = 404;
+            error.frontend_message = "Book does not exist for this account";
+            throw error;
+        }
+        console.log(`Found ${userInformation.email} book (#${book_id}) in the database!`);
+
         // Retrieve all notes for the book
         console.log(`Retrieving all of ${userInformation.email}'s notes for their book #${book_id}...`);
         selectQuery = `SELECT

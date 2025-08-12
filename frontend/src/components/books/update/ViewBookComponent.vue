@@ -1,5 +1,6 @@
 <template>
 <section id="view-a-book" class="component">
+    <h2>Check Book ({{ props.name }} {{ props.bookId }})</h2>
     <section class="loader" v-if="isLoading.page">
     </section>
 
@@ -8,6 +9,7 @@
     </section>
 
     <section class="retrieve-success" v-else>
+        <p>ID: {{ bookInformation.id }}</p>
         <p>Title: {{ bookInformation.title }}</p>
         <p>Plot Description: {{ bookInformation.plot_description ? bookInformation.plot_description : 'N/A' }}</p>
         <p>Extra Information: {{ bookInformation.extra_information ? bookInformation.extra_information : 'N/A' }}</p>
@@ -53,9 +55,8 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
-import { onBeforeRouteUpdate } from 'vue-router';
 import axios from 'axios';
 
 const props = defineProps({
@@ -272,9 +273,39 @@ onMounted(async () => {
     await retrieveABook(props.bookId);
 });
 
-// React to param changes with onBeforeRouteUpdate
-onBeforeRouteUpdate((to) => {
-    const nextId = to.params.bookId;
-    if (nextId) retrieveABook(nextId);
-});
+// Situations where user attempts to change ID in the url
+watch(() => props.bookId, async (id) => {
+    if (!id) return
+
+    bookInformation.id = null
+    bookInformation.title = null
+    bookInformation.img = null
+    bookInformation.plot_description = null
+    bookInformation.extra_information = null
+    bookInformation.release_date = null
+    bookInformation.end_date = null
+    bookInformation.reread = null
+    bookInformation.date_added = null
+    bookInformation.read_amount = null
+    readActivity.id = null
+    readActivity.latest_read = null
+
+    try {
+        await retrieveABook(id)
+    
+        // Only now, after a successful fetch, sync the query to the real title.
+        if (route.query.name !== bookInformation.title) {
+                router.replace({
+                    name: 'view-book',
+                    params: { book_id: id },
+                    query: { name: bookInformation.title },
+                })
+        }
+    } catch {
+        // On invalid ID (e.g., 404), DO NOT router.replace back to the old book.
+        // Option 1: clear the query so URL reflects “unknown”
+        router.replace({ name: 'view-book', params: { book_id: id }, query: {} })
+    }
+}, { immediate: true })
+
 </script>
