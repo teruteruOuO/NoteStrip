@@ -13,7 +13,7 @@
 
     <section class="retrieve-success" v-else>
         <div v-for="book in books" :key="book.id">
-            <p>{{ book.title }}</p>
+            <p><RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">{{ book.title }}</RouterLink></p>
             <p><img :src="book.image_source" :alt="book.title" style="max-width: 200px; max-height: 200px;"></p>
         </div>
     </section>
@@ -23,6 +23,7 @@
 <script setup>
 import { useUserStore } from '@/stores/user';
 import { reactive, ref, onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
 import axios from 'axios';
 
 const user = useUserStore();

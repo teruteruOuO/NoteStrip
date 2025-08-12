@@ -129,7 +129,8 @@ const addBook = async () => {
         feedback.message = storeDataResponse.data.message;
         feedback.success = true;
 
-        router.push({ name: 'books' });
+        // Reroute to the view page of this book
+        router.push({ name: 'view-book', params: { book_id: storeDataResponse.data.book_id }, query: { name: storeDataResponse.data.name } });
 
     } catch (error) {
         console.error(`An error occured while adding the user's book`);
