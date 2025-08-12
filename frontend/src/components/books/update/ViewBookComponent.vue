@@ -1,5 +1,5 @@
 <template>
-<section id="view-book" class="component">
+<section id="view-a-book" class="component">
     <section class="loader" v-if="isLoading.page">
     </section>
 
@@ -43,7 +43,7 @@
                 </li>
             </ul>
 
-            <section class="feedback" :class="{ 'success': feedback.button.success, 'fail': !feedback.button.success }">
+            <section class="feedback" :class="{ 'success': feedback.button.success, 'fail': !feedback.button.success }" v-if="feedback.button.message !== ''">
                 <p>{{ feedback.button.message }}</p>
             </section>
         </section>
@@ -163,6 +163,12 @@ const rereadBook = async () => {
         feedback.button.success = true;
         feedback.button.message = response.data.message;
 
+        // Remove the feedback message after 5 seconds
+        setTimeout(() => {
+            feedback.button.success = false;
+            feedback.button.message = '';
+        }, 5000);
+
         /* AJAX call operation instead of refresh */
         // Reset all variables except for rereadBook variables and the image
         feedback.page.success = false;
@@ -214,6 +220,12 @@ const unRereadBook = async () => {
 
         feedback.button.success = true;
         feedback.button.message = response.data.message;
+
+        // Remove the feedback message after 5 seconds
+        setTimeout(() => {
+            feedback.button.success = false;
+            feedback.button.message = '';
+        }, 5000);
 
         /* AJAX call operation instead of refresh */
         // Reset all variables except for rereadBook variables

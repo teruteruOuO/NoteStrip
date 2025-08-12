@@ -70,8 +70,11 @@ const router = createRouter({
 			path: '/view-book/:book_id',
 			name: 'view-book',
 			meta: { requiresAuth: true },
-			component: () => import('../views/BooksView/CheckBookView.vue'),
-			props: true
+			component: () => import('../views/BooksView/ViewBookView.vue'),
+			props: route => ({
+				book_id: String(route.params.book_id),
+				name: route.query.name ? String(route.query.name) : ''
+			})
 		},
 		{
             path: '/:pathMatch(.*)*',

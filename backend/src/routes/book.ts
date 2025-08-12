@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generateSignedS3UploadURL, addBook, retrieveAllBooks, retrieveABook, retrieveBooksNotes, rereadABook, unRereadABook } from "../controllers/book";
+import { generateSignedS3UploadURL, addBook, retrieveAllBooks, retrieveABook, retrieveBooksNotes, rereadABook, unRereadABook, addNote, deleteNote } from "../controllers/book";
 import { authorizeToken } from "../middlewares/authorize-token";
 import { matchUserId } from "../middlewares/match-user-id";
 
@@ -12,6 +12,9 @@ router.get('/all-books/:acct_id', authorizeToken, matchUserId, retrieveAllBooks)
 
 router.get('/view-book/:acct_id/:book_id', authorizeToken, matchUserId, retrieveABook);
 router.get('/view-notes/:acct_id/:book_id', authorizeToken, matchUserId, retrieveBooksNotes);
+router.post('/add-note/:acct_id/:book_id', authorizeToken, matchUserId, addNote);
+router.post('/delete-note/:acct_id/:book_id/:note_id', authorizeToken, matchUserId, deleteNote);
+
 router.post('/reread/:acct_id/:book_id', authorizeToken, matchUserId, rereadABook);
 router.post('/unreread/:acct_id/:book_id/:bra_id', authorizeToken, matchUserId, unRereadABook);
 

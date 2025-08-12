@@ -1,8 +1,8 @@
 <template>
-<main id="check-book" class="view">
+<main id="view-book" class="view">
     <h1>Check book view</h1>
     <ViewBookComponent :book-id="book_id" :name="name" />
-    <ViewBookNoteComponent :book-id="book_id" />
+    <ViewBookNoteComponent :book-id="book_id" :name="name" />
 </main>
 </template>
 

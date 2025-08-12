@@ -10,15 +10,10 @@ CREATE TABLE BOOK (
     BOOK_DATE_RELEASE DATE, /* Optional release date of the book */
     BOOK_DATE_END DATE, /* Optional end date of the book */
     BOOK_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP, /* Time this book was initially recorded */
-    BOOK_READ VARCHAR(3) DEFAULT('yes') NOT NULL, /* Determines if the book has been re-read again; yes at first insertion */
-    BOOK_LATEST_READ TIMESTAMP DEFAULT CURRENT_TIMESTAMP, /* The latest time this book was re-read*/
     FOREIGN KEY (ACCT_ID)
 		REFERENCES ACCOUNT (ACCT_ID)
         ON UPDATE CASCADE
 );
-
-ALTER TABLE BOOK
-ADD CONSTRAINT CHK_BOOK_READ CHECK (BOOK_READ IN ('yes', 'no')); /* Limits BOOK_READ to only yes or no values */
 
 -- Create book activity row after a new book is inserted
 DROP TRIGGER IF EXISTS trg_book_after_insert_add_activity;
@@ -35,13 +30,3 @@ BEGIN
   );
 END$$
 DELIMITER ;
-
-/* Every 30 minutes, check every book with BOOK_READ as 'yes' to switch back to 'no' 10 hours after their BOOK_LATEST_READ */
-CREATE EVENT ev_switch_book_read
-ON SCHEDULE EVERY 30 MINUTE
-STARTS CURRENT_TIMESTAMP
-DO
-    UPDATE BOOK
-    SET BOOK_READ = 'no'
-    WHERE BOOK_READ = 'yes'
-      AND BOOK_LATEST_READ <= (NOW() - INTERVAL 10 HOUR);

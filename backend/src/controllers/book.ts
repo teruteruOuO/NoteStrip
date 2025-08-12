@@ -106,7 +106,7 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
 
         // Retrieve all of the user's books
         console.log(`Retrieving all of ${userInformation.email}'s books...`);
-        selectQuery = "SELECT BOOK_ID, BOOK_TITLE, BOOK_IMG FROM BOOK WHERE ACCT_ID = ? ORDER BY BOOK_LATEST_READ DESC;";
+        selectQuery = "SELECT BOOK_ID, BOOK_TITLE, BOOK_IMG FROM BOOK WHERE ACCT_ID = ? ORDER BY BOOK_TIMESTAMP DESC;";
         resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id]);
         console.log(`Successfully retrieved all of ${userInformation.email}'s books!`);
 
@@ -135,7 +135,7 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
 export const retrieveABook = async (req: Request, res: Response, next: NextFunction) => {
     try {
         type LatestReadActivity = { id: number, latest_read: string }
-        type BookInformation = { id: number, title: string, img: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null, reread: 'yes' | 'no' , date_added: string };
+        type BookInformation = { id: number, title: string, img: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null, reread: 'yes' | 'no' | null , date_added: string };
         let selectQuery: string;
         let resultQuery: any[];
         let error: AppError;
@@ -168,7 +168,6 @@ export const retrieveABook = async (req: Request, res: Response, next: NextFunct
                         BOOK_EXTRA_INFO, 
                         DATE_FORMAT(BOOK_DATE_RELEASE, '%M %e, %Y') AS BOOK_DATE_RELEASE,
                         DATE_FORMAT(BOOK_DATE_END, '%M %e, %Y')      AS BOOK_DATE_END,
-                        BOOK_READ,
                         DATE_FORMAT(BOOK_TIMESTAMP, '%M %e, %Y %l:%i %p') AS BOOK_TIMESTAMP
                     FROM BOOK WHERE ACCT_ID = ? 
                     AND BOOK_ID = ?;`;
@@ -187,7 +186,7 @@ export const retrieveABook = async (req: Request, res: Response, next: NextFunct
             extra_information: resultQuery[0].BOOK_EXTRA_INFO,
             release_date: resultQuery[0].BOOK_DATE_RELEASE,
             end_date: resultQuery[0].BOOK_DATE_END,
-            reread: resultQuery[0].BOOK_READ,
+            reread: null,
             date_added: resultQuery[0].BOOK_TIMESTAMP
         }
         console.log(`Found ${userInformation.email}'s book! ${bookInformation.title} (#${bookInformation.id})!`);
@@ -195,27 +194,26 @@ export const retrieveABook = async (req: Request, res: Response, next: NextFunct
         // Retrieve the latest activity read for this book
         console.log(`Retrieving the latest activity read (last 10 hours) of ${bookInformation.title} by ${userInformation.email}...`);
         selectQuery = `SELECT BR_ACTIVITY_ID, DATE_FORMAT(BR_ACTIVITY_LATEST_READ, '%M %e, %Y %l:%i %p') AS BR_ACTIVITY_LATEST_READ
-                        FROM BOOK B
-                        JOIN BOOK_READ_ACTIVITY BRA
-                        ON B.BOOK_ID = BRA.BOOK_ID
-                    WHERE B.BOOK_ID = ?
-                    AND BOOK_READ = ?
+                        FROM BOOK_READ_ACTIVITY
+                    WHERE BOOK_ID = ?
                     AND BR_ACTIVITY_LATEST_READ >= (NOW() - INTERVAL 10 HOUR);`;
-        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [bookInformation.id, 'yes']);
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [bookInformation.id]);
 
         if (resultQuery.length == 1) {
             latestReadActivity = {
                 id: resultQuery[0].BR_ACTIVITY_ID,
                 latest_read: resultQuery[0].BR_ACTIVITY_LATEST_READ
             }
+            bookInformation.reread = 'yes'
             console.log(`Found the latest record activity for ${userInformation.email}'s book ${bookInformation.title}. Book Reread should have a value of 'yes'`);
         } else {
             latestReadActivity = null;
+            bookInformation.reread = 'no'
             console.log(`There seems to be no latest book read activity for ${userInformation.email}'s book ${bookInformation.title}. Book Reread should have a value of 'no'`);
         }
 
         // Retrieve the amount of times this book has been read
-        console.log(`Retrieving the amount of times ${bookInformation.title} has be reread by ${userInformation.email}...`);
+        console.log(`Retrieving the amount of times ${bookInformation.title} has been reread by ${userInformation.email}...`);
         selectQuery = `SELECT COUNT(*) AS REREAD_AMOUNT
                         FROM BOOK_READ_ACTIVITY
                     WHERE BOOK_ID = ?;`;
@@ -237,6 +235,115 @@ export const retrieveABook = async (req: Request, res: Response, next: NextFunct
     } catch (err: unknown) {
         next(err);
     }
+}
+
+// Reread a book
+export const rereadABook = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let selectQuery: string;
+        let resultQuery: any[];
+        let error: AppError;
+        let { book_title } = req.body as { book_title: string};
+        const book_id = Number(req.params.book_id);
+        const userInformation = req.user as IDecodedTokenPayload;
+
+        console.log('Processing rereadABook...');
+
+        // Ensure the parameter exists
+        console.log(`Checking if ${userInformation.email}'s book ID exists in the parameters and book title in the req.body...`);
+        if (!book_id || !book_title) {
+            error = new Error(`${userInformation.email} did not provide the book's ID in the parameters or the book title in the request body`);
+            error.status = 404;
+            error.frontend_message = "Missing the book's identification number and/or the book title";
+            throw error;
+        }
+        console.log(`Found the book id in  ${userInformation.email}'s parameter!`);
+
+        // Ensure there's no read activity from the past 10 hrs
+        console.log(`Checking to see if ${userInformation.email} has already reread book ${book_title} within the last 10 hours...`);
+        selectQuery = `SELECT BR_ACTIVITY_ID, DATE_FORMAT(BR_ACTIVITY_LATEST_READ, '%M %e, %Y %l:%i %p') AS BR_ACTIVITY_LATEST_READ
+                        FROM BOOK_READ_ACTIVITY
+                    WHERE BOOK_ID = ?
+                    AND BR_ACTIVITY_LATEST_READ >= (NOW() - INTERVAL 10 HOUR);`;
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [book_id]);
+        if (resultQuery.length >= 1) {
+            error = new Error(`${userInformation.email} has already reread book ${book_title} within the last 10 hours`);
+            error.status = 400;
+            error.frontend_message = "You've already read the book within the last 10 hours. Come back again after 10 hours";
+            throw error;
+        }
+
+        // Perform reread activity
+        console.log(`Recording reread activity of book ${book_title} for ${userInformation.email}...`);
+        transactionQuery = [
+            {
+                query: "INSERT INTO BOOK_READ_ACTIVITY (BOOK_ID) VALUES (?);",
+                params: [book_id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [userInformation.id, 'user', `User successfully reread the book ${book_title}`]
+            },
+        ];
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully recorded reread activity of book ${book_title} for ${userInformation.email} in the database!`);
+
+        res.status(200).json({ message: `Successfully reread the book` });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+
+}
+
+// Revert a reread (Un-reread) a book
+export const unRereadABook = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let selectQuery: string;
+        let resultQuery: any[];
+        let error: AppError;
+        let { book_title } = req.body as { book_title: string};
+        const book_id = Number(req.params.book_id);
+        const book_read_acivity_id = Number(req.params.bra_id);
+        const userInformation = req.user as IDecodedTokenPayload;
+
+        console.log('Processing unRereadABook...');
+
+        // Ensure the parameter exists
+        console.log(`Checking if ${userInformation.email}'s book ID and book read activity ID exist in the parameters as well as the book title...`);
+        if (!book_id || !book_read_acivity_id || !book_title) {
+            error = new Error(`${userInformation.email} did not provide the book's ID or book read activity ID in the parameters or the book title in the request body`);
+            error.status = 404;
+            error.frontend_message = "Missing the book's identification number, boook read activity, and/or the book title";
+            throw error;
+        }
+        console.log(`Found the book id in ${userInformation.email}'s parameter!`);
+
+        // Perform a revert on reread activity
+        console.log(`Recording reread activity of book ${book_title} for ${userInformation.email}...`);
+        transactionQuery = [
+            {
+                query: "DELETE FROM BOOK_READ_ACTIVITY WHERE BR_ACTIVITY_ID = ?;",
+                params: [book_read_acivity_id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [userInformation.id, 'user', `User reverted their read action on ${book_title} for today`]
+            },
+        ];
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully reverted reread activity of book ${book_title} for ${userInformation.email} in the database!`);
+
+        res.status(200).json({ message: `Successfully reverted the reread activity of the book` });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+
 }
 
 // Retrieve all notes for a single book
@@ -300,119 +407,93 @@ export const retrieveBooksNotes = async (req: Request, res: Response, next: Next
     }
 }
 
-// Reread a book
-export const rereadABook = async (req: Request, res: Response, next: NextFunction) => {
+// Add a new note for a book
+export const addNote = async (req: Request, res: Response, next: NextFunction) => {
     try {
         let transactionQuery: ITransactionQuery[];
-        let selectQuery: string;
         let resultQuery: any[];
         let error: AppError;
-        let { book_title } = req.body as { book_title: string};
-        const book_id = Number(req.params.book_id);
+        const { title, content, name } = req.body as { title: string, content: string, name: string };
         const userInformation = req.user as IDecodedTokenPayload;
-
-        console.log('Processing rereadABook...');
+        const book_id = Number(req.params.book_id);
+        
+        console.log('Processing addNote...');
 
         // Ensure the parameter exists
-        console.log(`Checking if ${userInformation.email}'s book ID exists in the parameters and book title in the req.body...`);
-        if (!book_id || !book_title) {
-            error = new Error(`${userInformation.email} did not provide the book's ID in the parameters or the book title in the request body`);
+        console.log(`Checking if ${userInformation.email}'s book ID exists in the parameters as well as the note's title and content and name of the book in the request body...`);
+        if (!book_id || !title || !content || !name) {
+            error = new Error(`${userInformation.email} did not provide the book's ID in the parameters OR title and content OR name of the book in the request body`);
             error.status = 404;
-            error.frontend_message = "Missing the book's identification number and/or the book title";
+            error.frontend_message = "Missing the book's identification number the note's title and content, and name of the book";
             throw error;
         }
-        console.log(`Found the book id in  ${userInformation.email}'s parameter!`);
+        console.log(`Found the book id in ${userInformation.email}'s parameter as well as the notes' title and content!`);
 
-        // Ensure there's no read activity from the past 10 hrs
-        console.log(`Checking to see if ${userInformation.email} has already reread book ${book_title} within the last 10 hours...`);
-        selectQuery = `SELECT BR_ACTIVITY_ID, DATE_FORMAT(BR_ACTIVITY_LATEST_READ, '%M %e, %Y %l:%i %p') AS BR_ACTIVITY_LATEST_READ
-                        FROM BOOK_READ_ACTIVITY
-                    WHERE BOOK_ID = ?
-                    AND BR_ACTIVITY_LATEST_READ >= (NOW() - INTERVAL 10 HOUR);`;
-        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [book_id]);
-        if (resultQuery.length >= 1) {
-            error = new Error(`${userInformation.email} has already reread book ${book_title} within the last 10 hours`);
-            error.status = 400;
-            error.frontend_message = "You've already read the book within the last 10 hours. Come back again after 10 hours";
-            throw error;
-        }
-
-        // Perform reread activity
-        console.log(`Recording reread activity of book ${book_title} for ${userInformation.email}...`);
+        // Add note
+        console.log(`Adding note ${title} for ${userInformation.email}'s book ${name} in the database...`);
         transactionQuery = [
             {
-                query: "INSERT INTO BOOK_READ_ACTIVITY (BOOK_ID) VALUES (?);",
-                params: [book_id]
-            },
-            {
-                query: "UPDATE BOOK SET BOOK_READ = ? WHERE BOOK_ID = ? AND ACCT_ID = ?;",
-                params: ['yes', book_id, userInformation.id]
+                query: "INSERT INTO NOTE (BOOK_ID, NOTE_TITLE, NOTE_CONTENT) VALUES (?, ?, ?);",
+                params: [book_id, title, content]
             },
             {
                 query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
-                params: [userInformation.id, 'user', `User successfully reread the book ${book_title}`]
+                params: [userInformation.id, 'user', `User added a new note for ${name} (${title})`]
             },
-        ];
+        ]
         resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
-        console.log(`Successfully recorded reread activity of book ${book_title} for ${userInformation.email} in the database!`);
+        console.log(`Successfully added note ${title} for ${userInformation.email}'s book ${name} in the database!`);
 
-        res.status(200).json({ message: `Successfully reread the book` });
+        res.status(201).json({ message: `Successfully added note to book ${name} `});
         return;
 
     } catch (err: unknown) {
         next(err);
     }
-
 }
 
-// Revert a reread (Un-reread) a book
-export const unRereadABook = async (req: Request, res: Response, next: NextFunction) => {
+// Delete a note for a book
+export const deleteNote = async (req: Request, res: Response, next: NextFunction) => {
     try {
         let transactionQuery: ITransactionQuery[];
-        let selectQuery: string;
         let resultQuery: any[];
         let error: AppError;
-        let { book_title } = req.body as { book_title: string};
-        const book_id = Number(req.params.book_id);
-        const book_read_acivity_id = Number(req.params.bra_id);
         const userInformation = req.user as IDecodedTokenPayload;
+        const note_id = Number(req.params.note_id);
+        const book_id = Number(req.params.book_id);
+        const { name } = req.body as { name: string };
 
-        console.log('Processing unRereadABook...');
+        console.log(`Processing deleteNote...`);
 
         // Ensure the parameter exists
-        console.log(`Checking if ${userInformation.email}'s book ID and book read activity ID exist in the parameters as well as the book title...`);
-        if (!book_id || !book_read_acivity_id || !book_title) {
-            error = new Error(`${userInformation.email} did not provide the book's ID or book read activity ID in the parameters or the book title in the request body`);
+        console.log(`Checking if ${userInformation.email}'s note id or book id and name exists in the parameters...`);
+        if (!note_id || !book_id || !name) {
+            error = new Error(`${userInformation.email} did not provide the note's id nor the book's name and id`);
             error.status = 404;
-            error.frontend_message = "Missing the book's identification number, boook read activity, and/or the book title";
+            error.frontend_message = "Missing the note's and book's identification number and book name";
             throw error;
         }
-        console.log(`Found the book id in ${userInformation.email}'s parameter!`);
+        console.log(`Found the note id (#${note_id}) and book id (#${book_id}) in ${userInformation.email}'s parameter and the book name (${name})!`);
 
-        // Perform a revert on reread activity
-        console.log(`Recording reread activity of book ${book_title} for ${userInformation.email}...`);
+        // Delete the note
+        console.log(`Deleting note #${note_id} for ${userInformation.email}'s book ${name}`);
         transactionQuery = [
             {
-                query: "DELETE FROM BOOK_READ_ACTIVITY WHERE BR_ACTIVITY_ID = ?;",
-                params: [book_read_acivity_id]
-            },
-            {
-                query: "UPDATE BOOK SET BOOK_READ = ? WHERE BOOK_ID = ? AND ACCT_ID = ?;",
-                params: ['no', book_id, userInformation.id]
+                query: "DELETE FROM NOTE WHERE NOTE_ID = ? AND BOOK_ID = ?;",
+                params: [note_id, book_id]
             },
             {
                 query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
-                params: [userInformation.id, 'user', `User reverted their read action on ${book_title} for today`]
+                params: [userInformation.id, 'user', `User deleted a note for book ${name}`]
             },
-        ];
+        ]
         resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
-        console.log(`Successfully reverted reread activity of book ${book_title} for ${userInformation.email} in the database!`);
+        console.log(`Successfully deleted note #${note_id} for ${userInformation.email}'s book ${name} in the database!`);
 
-        res.status(200).json({ message: `Successfully reverted the reread activity of the book` });
+        res.status(200).json({ message: `Successfully deleted note from the book ${name}` });
         return;
 
     } catch (err: unknown) {
         next(err);
     }
-
 }
