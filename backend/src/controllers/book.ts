@@ -131,8 +131,8 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
     }
 }
 
-// Retrieve a single book
-export const retrieveABook = async (req: Request, res: Response, next: NextFunction) => {
+// Retrieve a single book for VIEWING
+export const viewABook = async (req: Request, res: Response, next: NextFunction) => {
     try {
         type LatestReadActivity = { id: number, latest_read: string }
         type BookInformation = { id: number, title: string, img: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null, reread: 'yes' | 'no' | null , date_added: string };
@@ -145,7 +145,7 @@ export const retrieveABook = async (req: Request, res: Response, next: NextFunct
         const book_id = Number(req.params.book_id);
         const userInformation = req.user as IDecodedTokenPayload;
 
-        console.log('Processing retrieveABook...');
+        console.log('Processing viewABook...');
 
         // Ensure the parameter exists
         console.log(`Checking if ${userInformation.email}'s book ID exists in the parameters...`);
@@ -464,6 +464,52 @@ export const addNote = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
+// Update a note for a book
+export const updateNote = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let resultQuery: any[];
+        let error: AppError;
+        const userInformation = req.user as IDecodedTokenPayload;
+        const note_id = Number(req.params.note_id);
+        const book_id = Number(req.params.book_id);
+        const { title, content, name } = req.body as { title: string, content: string, name: string };
+
+        console.log(`Processing updateNote...`);
+
+        // Ensure the parameter exists
+        console.log(`Checking if ${userInformation.email}'s note id and book id exist in the parameters as well as the note's title and content and book name in the request body...`);
+        if (!note_id || !book_id || !title || !content || !name) {
+            error = new Error(`${userInformation.email} did not provide the note's id, title, content, book id and its name`);
+            error.status = 404;
+            error.frontend_message = "Missing the note's and book's identification number, book name, and note's title and content";
+            throw error;
+        }
+        console.log(`Found the note id (#${note_id}) and book id (#${book_id}) in ${userInformation.email}'s parameter and the note's title and content and book name!`);
+
+        // Update the note
+        console.log(`Updating note #${note_id} for ${userInformation.email}'s book ${name}`);
+        transactionQuery = [
+            {
+                query: "UPDATE NOTE SET NOTE_TITLE = ?, NOTE_CONTENT = ? WHERE NOTE_ID = ? AND BOOK_ID = ?;",
+                params: [title, content, note_id, book_id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [userInformation.id, 'user', `User updated note (${title}) for book ${name}`]
+            },
+        ]
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully updated note #${note_id} for ${userInformation.email}'s book ${name} in the database!`);
+
+        res.status(200).json({ message: `Successfully updated note from the book ${name}` });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
 // Delete a note for a book
 export const deleteNote = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -503,6 +549,222 @@ export const deleteNote = async (req: Request, res: Response, next: NextFunction
         console.log(`Successfully deleted note #${note_id} for ${userInformation.email}'s book ${name} in the database!`);
 
         res.status(200).json({ message: `Successfully deleted note from the book ${name}` });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Update a Book (Step 1 of 3: Retrieve the book's contents)
+export const retrieveBookForUpdate = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        type BookInformation = { id: number, title: string, img: { s3: string, db: string }, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null };
+        let selectQuery: string;
+        let resultQuery: any[];
+        let error: AppError;
+        let bookInformation: BookInformation;
+        const book_id = Number(req.params.book_id);
+        const userInformation = req.user as IDecodedTokenPayload;
+
+        console.log('Processing retrieveBookForUpdate...');
+
+        // Ensure the parameter exists
+        console.log(`Checking if ${userInformation.email}'s book ID exists in the parameters...`);
+        if (!book_id) {
+            error = new Error(`${userInformation.email} did not provide the book's ID in the parameters`);
+            error.status = 404;
+            error.frontend_message = "Missing the book's identification number";
+            throw error;
+        }
+        console.log(`Found the book id (#${book_id}) in ${userInformation.email}'s parameter!`);
+
+        // Find the book
+        console.log(`Finding ${userInformation.email}'s book with the id of ${book_id} from the database...`);
+        selectQuery = `
+                    SELECT 
+                        BOOK_ID, 
+                        BOOK_TITLE, 
+                        BOOK_IMG, 
+                        BOOK_PLOT_DESC, 
+                        BOOK_EXTRA_INFO,
+                        DATE_FORMAT(BOOK_DATE_RELEASE, '%Y-%m-%d') AS BOOK_DATE_RELEASE,
+                        DATE_FORMAT(BOOK_DATE_END, '%Y-%m-%d') AS BOOK_DATE_END
+                    FROM BOOK WHERE ACCT_ID = ? AND BOOK_ID = ?;`;
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id, book_id]);
+        if (resultQuery.length !== 1) {
+            error = new Error(`Book ID of ${book_id} does not exist for ${userInformation.email}`);
+            error.status = 404;
+            error.frontend_message = "Book does not exist for this account";
+            throw error;
+        }
+        bookInformation = {
+            id: resultQuery[0].BOOK_ID,
+            title: resultQuery[0].BOOK_TITLE,
+            img: {
+                s3: await PersonalS3Bucket.RetrieveImageUrl(resultQuery[0].BOOK_IMG),
+                db: resultQuery[0].BOOK_IMG
+            },
+            plot_description: resultQuery[0].BOOK_PLOT_DESC,
+            extra_information: resultQuery[0].BOOK_EXTRA_INFO,
+            release_date: resultQuery[0].BOOK_DATE_RELEASE,
+            end_date: resultQuery[0].BOOK_DATE_END
+        }
+        console.log(`Found ${userInformation.email}'s book! ${bookInformation.title} (#${bookInformation.id})!`);
+
+        res.status(200).json({
+            message: `Successfully retrieved the book ${bookInformation.title}`,
+            book: bookInformation
+        });
+        return;
+    } catch (err: unknown) {
+
+    }
+}
+
+// Update a Book (Step 2 of 3: Replace the stored image with a new one IF there's a new uploaded image)
+export const replaceSignedS3UploadURL = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { file_name, content_type, old_image_location } = req.body as { file_name: string, content_type: any, old_image_location: string };
+        const userInformation = req.user as IDecodedTokenPayload
+        let newImageSignedURL: string;
+        let newImageLocation: string;
+        let oldImageSignedDeleteURL: string;
+        let error: AppError;
+
+        console.log(`Processing replaceSignedS3UploadURL...`);
+
+        // Discontinue if these do not exist
+        console.log(`Checking if ${userInformation.email} provided the file name or content type of the image or the old image's location...`);
+        if (!file_name || !content_type || !old_image_location) {
+            error = new Error(`${userInformation.email} did not provide the file name or content type of the image or the old image's location`);
+            error.status = 404;
+            error.frontend_message = "Missing file name, its content type, and the only image location.";
+            throw error;
+        }
+        console.log(`${userInformation.email}'s file name (${file_name}), content type (${content_type}), and old image location (${old_image_location}) are found!`);
+
+        // Generate an upload url for the new image
+        console.log(`Generating an S3 upload url for ${userInformation.email}'s new image of the book and its image location...`);
+        newImageSignedURL = await PersonalS3Bucket.generateUploadUrl(file_name, content_type);
+        newImageLocation = `${PersonalS3Bucket.bookImagesLocation}/${file_name}`;
+        console.log(`Successfully generated an S3 upload url for ${userInformation.email}'s new image file (${file_name})`);
+
+        // Generate a delete URL for the old location
+        console.log(`Generating an S3 delete url for ${userInformation.email}'s old image of the book (${old_image_location})...`);
+        oldImageSignedDeleteURL = await PersonalS3Bucket.generateDeleteUrl(old_image_location);
+        console.log(`Successfully generated an S3 delete url for ${userInformation.email}'s old image location (${old_image_location})`);
+
+        res.status(201).json({
+            message: 'Successfully generated a signed s3 upload url',
+            new_image: {
+                signed_url: newImageSignedURL,
+                location: newImageLocation
+            },
+            old_image_signed_delete_url: oldImageSignedDeleteURL
+        });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Update a Book (Step 3 of 3: Update the book's information in the database)
+export const updateBook = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+        type BookInformation = { title: string, image: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null };
+        let transactionQuery: ITransactionQuery[];
+        let resultQuery: any[];
+        let error: AppError;
+        const book_id = Number(req.params.book_id);
+        const userInformation = req.user as IDecodedTokenPayload;
+        const { title, image, plot_description, extra_information, release_date, end_date } = req.body as BookInformation;
+        
+        console.log('Processing updateBook...');
+
+        // Discontinue if file name or content type is missing
+        console.log(`Checking if ${userInformation.email} provided the required attributes: book title and book image location and book id`);
+        if (!title || !image || !book_id) {
+            error = new Error(`${userInformation.email} did not provide the book title or the book image's location or the book's id`);
+            error.status = 404;
+            error.frontend_message = "Missing book title or book image location, or book id";
+            throw error;
+        }
+        console.log(`${userInformation.email}'s book title (${title}) and its image location (${image}) are found!`);
+
+        // Store the book information to the database
+        console.log(`Updating ${userInformation.email}'s book (${title}) to the database...`);
+        transactionQuery = [
+            {
+                query: 'UPDATE BOOK SET BOOK_TITLE = ?, BOOK_IMG = ?, BOOK_PLOT_DESC = ?, BOOK_EXTRA_INFO = ?, BOOK_DATE_RELEASE = ?, BOOK_DATE_END = ? WHERE ACCT_ID = ? AND BOOK_ID = ?;',
+                params: [title, image, plot_description, extra_information, release_date, end_date, userInformation.id, book_id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [userInformation.id, 'user', `User successfully updated the book ${title}'s information`]
+            },
+        ];
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully updated the book (${title}) of ${userInformation.email} in the database!`);
+
+        res.status(200).json({
+            message: `Successfully updated the book ${title}!`,
+        });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+}
+
+// Delete a Book
+export const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let transactionQuery: ITransactionQuery[];
+        let resultQuery: any[];
+        let error: AppError;
+        let imageSignedDeleteURL: string;
+        const book_id = Number(req.params.book_id);
+        const userInformation = req.user as IDecodedTokenPayload;
+        const { title, image_location } = req.body as { title: string, image_location: string };
+
+        console.log('Processing deleteBook...');
+
+        // Discontinue if book id, title, or image location is missing
+        console.log(`Checking if ${userInformation.email} provided book_id, title, or image location in the request parameters and body...`);
+        if (!title || !image_location || !book_id) {
+            error = new Error(`${userInformation.email} didn't provide book_id, title, or image location in the request parameter and body.`);
+            error.status = 404;
+            error.frontend_message = "Missing book identification number, title, and its image location";
+            throw error;
+        }
+        console.log(`Found the required parameters and body from ${userInformation.email}! (book_id: ${book_id}) (title: ${title}) (image_location: ${image_location})`);
+
+        // Generate a delete URL for the image
+        console.log(`Generating an S3 delete url for ${userInformation.email}'s image of the book (${image_location})...`);
+        imageSignedDeleteURL = await PersonalS3Bucket.generateDeleteUrl(image_location);
+        console.log(`Successfully generated an S3 delete url for ${userInformation.email}'s image location (${image_location})`);
+
+        // Delete the book from the database
+        console.log(`Deleting book ${title} from ${userInformation.email}'s database records...`);
+        transactionQuery = [
+            {
+                query: "DELETE FROM BOOK WHERE BOOK_ID = ? AND ACCT_ID = ?;",
+                params: [book_id, userInformation.id]
+            },
+            {
+                query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
+                params: [userInformation.id, 'user', `User successfully deleted the book ${title}`]
+            },
+        ];
+        resultQuery = await DatabaseScript.executeTransaction(transactionQuery);
+        console.log(`Successfully deleted ${title} from ${userInformation.email}'s database records!`);
+
+        res.status(200).json({
+            message: `Successfully deleted ${title} from your account!`,
+            image_signed_delete_url: imageSignedDeleteURL
+        });
         return;
 
     } catch (err: unknown) {

@@ -77,6 +77,12 @@ const router = createRouter({
 			})
 		},
 		{
+			path: '/edit-book/:book_id',
+			name: 'edit-book',
+			meta: { requiresAuth: true },
+			component: () => import('../views/BooksView/EditBookView.vue'),
+		},
+		{
             path: '/:pathMatch(.*)*',
             redirect: { name: 'home' }
         }
@@ -86,6 +92,12 @@ const router = createRouter({
 // This is triggered each time a user navigates from page to page
 router.beforeEach(async (to, from, next) => {
     const isValid = await authorizeToken(to.name, to.meta.requiresAuth ? true : false);
+
+	// Restrict access to edit-book unless coming from view-book
+    if (to.name === 'edit-book' && from.name !== 'view-book') {
+		window.history.back(); // navigates back to previous history entry
+		return;
+    }
 
     if (isValid) {
 		next();

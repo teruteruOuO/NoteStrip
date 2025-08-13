@@ -9,6 +9,9 @@
     </section>
 
     <section class="retrieve-success" v-else>
+        <section class="link">
+            <RouterLink :to="{ name: 'edit-book', params: { book_id: bookInformation.id } }">Edit {{ bookInformation.title }}'s details</RouterLink>
+        </section>
         <p>ID: {{ bookInformation.id }}</p>
         <p>Title: {{ bookInformation.title }}</p>
         <p>Plot Description: {{ bookInformation.plot_description ? bookInformation.plot_description : 'N/A' }}</p>
@@ -57,6 +60,7 @@
 import { useRouter, useRoute } from 'vue-router';
 import { reactive, onMounted, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
+import { RouterLink } from 'vue-router';
 import axios from 'axios';
 
 const props = defineProps({
@@ -140,6 +144,11 @@ const retrieveABook = async (book_id) => {
         if (error.response) {
             console.error("Backend error:", error.response);
             feedback.page.message = error.response.data.message;
+
+            // Go back to the books page if it doesn't exist
+            if (error.response.status === 404) {
+                router.push({ name: 'books' });
+            }
 
         // Handle unexpected errors
         } else {

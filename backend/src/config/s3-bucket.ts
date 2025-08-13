@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { IBucket } from '../../types/types';
 dotenv.config();
@@ -51,6 +51,21 @@ export class PersonalS3Bucket {
         });
 
         signedUrl = await getSignedUrl(PersonalS3Bucket.s3, command, { expiresIn: 60 * 500 });
+        return signedUrl;
+    }
+
+    // Generate a DELETE pre-signed URL for an object
+    public static async generateDeleteUrl(imageLocation: string): Promise<string> {
+        let command: DeleteObjectCommand;
+        let signedUrl: string;
+
+        command = new DeleteObjectCommand({
+            Bucket: PersonalS3Bucket.userWithS3Access.s3_bucket,
+            Key: imageLocation
+        });
+
+        // Expire in 5 minutes (same window as upload)
+        signedUrl = await getSignedUrl(PersonalS3Bucket.s3, command, { expiresIn: 60 * 5 });
         return signedUrl;
     }
 }
