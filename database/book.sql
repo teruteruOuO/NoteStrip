@@ -3,7 +3,7 @@
 CREATE TABLE BOOK (
 	BOOK_ID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, /* Unique ID for a book instance */
     ACCT_ID INT UNSIGNED NOT NULL, /* User tied to this book instance */
-    BOOK_TITLE VARCHAR(300) UNIQUE NOT NULL, /* Title of the book; must be unique */
+    BOOK_TITLE VARCHAR(300) NOT NULL, /* Title of the book */
     BOOK_IMG TEXT NOT NULL, /* Amazon S3 location for the book's image */
     BOOK_PLOT_DESC TEXT, /* Optional description of the book */
     BOOK_EXTRA_INFO TEXT, /* Optional information of the book */

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError, IDecodedTokenPayload, ITransactionQuery } from '../../types/types';
 import { DatabaseScript } from '../models/database-script';
 import { PersonalS3Bucket } from '../config/s3-bucket';
+import { neutralizeString } from '../miscellaneous/neutralize-string';
 
 // Add a Book (Step 1 of 2: Generate signed s3 Upload URL)
 export const generateSignedS3UploadURL = async (req: Request, res: Response, next: NextFunction) => {
@@ -100,15 +101,34 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
         let selectQuery: string;
         let resultQuery: any[];
         let books: Array<Books> = []; // initialize as []
+        let error: AppError;
+        let totalBooks: number;
         const userInformation = req.user as IDecodedTokenPayload;
+        const booksPerPage = 5;                                     // page size
+        const page = parseInt(req.query.page as string) || 1;       /* ?page=... (defaults to 1) */
+        const offset = (page - 1) * booksPerPage;                    // how many rows to skip
 
         console.log('Processing retrieveBooks...');
+        console.log(`Retrieving page ${page} of ${userInformation.email}'s books...`);
+
+        // Total book count for pagination (Count total rows for page count)
+        console.log(`Determining the total book count for ${userInformation.email}'s pagination...`);
+        selectQuery = "SELECT COUNT(*) AS total FROM BOOK WHERE ACCT_ID = ?";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id]);
+        if (resultQuery.length <= 0) {
+            error = new Error(`Unable to determine ${userInformation.email}'s total book count for pagination`);
+            error.status = 404;
+            error.frontend_message = "Unable to find book count";
+            throw error;
+        }
+        totalBooks = resultQuery[0]?.total || 0;
+        console.log(`Successfully determined ${userInformation.email}'s total book count for pagination: ${totalBooks}`);
 
         // Retrieve all of the user's books
-        console.log(`Retrieving all of ${userInformation.email}'s books...`);
-        selectQuery = "SELECT BOOK_ID, BOOK_TITLE, BOOK_IMG FROM BOOK WHERE ACCT_ID = ? ORDER BY BOOK_TIMESTAMP DESC;";
-        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id]);
-        console.log(`Successfully retrieved all of ${userInformation.email}'s books!`);
+        console.log(`Retrieving ${userInformation.email}'s books on page ${page}...`);
+        selectQuery = "SELECT BOOK_ID, BOOK_TITLE, BOOK_IMG FROM BOOK WHERE ACCT_ID = ? ORDER BY BOOK_TIMESTAMP DESC LIMIT ? OFFSET ?;";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id, booksPerPage, offset]);
+        console.log(`Successfully retrieved page ${page} of ${userInformation.email}'s books!`);
 
         if (resultQuery.length > 0) {
             books = await Promise.all(
@@ -121,7 +141,10 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
         }
 
         res.status(200).json({
-            message: `Successfully retrieved all books`,
+            message: `Successfully retrieved books (Page ${page} of ${Math.ceil(totalBooks / booksPerPage)})`,
+            total_books: totalBooks,
+            total_pages: Math.ceil(totalBooks / booksPerPage),
+            current_page: page,
             books: books
         });
         return;
@@ -130,6 +153,58 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
         next(err);
     }
 }
+
+// Retrieve a user's list of books based on the title in the search input
+export const searchBook = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        type Books = { id: number, title: string, image_source: string };
+        let selectQuery: string;
+        let resultQuery: any[];
+        let books: Array<Books> = []; // initialize as []
+        let error: AppError;
+        let { title } = req.query as { title: string };
+        const searchLimit = 5;
+        const userInformation = req.user as IDecodedTokenPayload;
+
+        console.log('Processing searchBook...');
+
+        // Ensure the title is in the request body
+        console.log(`Checking if ${userInformation.email} provided a title in the request parameters...`);
+        if (!title) {
+            error = new Error(`${userInformation.email} did not provide a title`);
+            error.status = 404;
+            error.frontend_message = "You must provide a title";
+            throw error;
+        }
+        console.log(`${userInformation.email} provided a title ${title}`);
+
+        // Retrieve the books that match the user's title
+        console.log(`Retrieving ${userInformation.email}'s books that contain ${title}`);
+        title = neutralizeString(title);
+        selectQuery = "SELECT BOOK_ID, BOOK_TITLE, BOOK_IMG FROM BOOK WHERE ACCT_ID = ? AND BOOK_TITLE LIKE CONCAT('%', ?, '%') ORDER BY BOOK_TIMESTAMP DESC LIMIT ?;";
+        resultQuery = await DatabaseScript.executeReadQuery(selectQuery, [userInformation.id, title, searchLimit]);
+        console.log(`Successfully retrieved books containing ${title} in their title`);
+
+        if (resultQuery.length > 0) {
+            books = await Promise.all(
+                resultQuery.map(async (book: any): Promise<Books> => ({
+                    id: book.BOOK_ID,
+                    title: book.BOOK_TITLE,
+                    image_source: await PersonalS3Bucket.RetrieveImageUrl(book.BOOK_IMG),
+                }))
+            );
+        }
+
+        res.status(200).json({
+            message: `Successfully retrieved books containing '${title}' in their title`,
+            books: books
+        });
+        return;
+
+    } catch (err: unknown) {
+        next(err);
+    }
+} 
 
 // Retrieve a single book for VIEWING
 export const viewABook = async (req: Request, res: Response, next: NextFunction) => {

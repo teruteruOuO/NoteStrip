@@ -71,7 +71,7 @@
                     </button>
 
                     <button type="button" @click="resetImage">
-                        <span>Reset Image</span>
+                        <span>Reset Image to Original</span>
                     </button>
 
                     <button type="button" @click="deleteBook" :disabled="isLoading.delete" :class="{ 'button-loading': isLoading.delete }">

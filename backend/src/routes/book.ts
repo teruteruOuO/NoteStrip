@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generateSignedS3UploadURL, addBook, retrieveAllBooks, viewABook, 
+import { generateSignedS3UploadURL, addBook, retrieveAllBooks, searchBook, viewABook, 
     retrieveBooksNotes, rereadABook, unRereadABook, addNote, deleteNote, updateNote,
     retrieveBookForUpdate, replaceSignedS3UploadURL, updateBook, deleteBook } from "../controllers/book";
 import { authorizeToken } from "../middlewares/authorize-token";
@@ -11,8 +11,9 @@ const router = Router();
 router.post('/upload-url/:acct_id', authorizeToken, matchUserId, generateSignedS3UploadURL);
 router.post('/add-book/:acct_id', authorizeToken, matchUserId, addBook);
 
-// Retrieve all books
+// Retrieve books
 router.get('/all-books/:acct_id', authorizeToken, matchUserId, retrieveAllBooks);
+router.get('/search-book/:acct_id', authorizeToken, matchUserId, searchBook);
 
 // View a book
 router.get('/view-book/:acct_id/:book_id', authorizeToken, matchUserId, viewABook);

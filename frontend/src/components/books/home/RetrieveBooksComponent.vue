@@ -7,43 +7,58 @@
         <p>{{ feedback.message }}</p>
     </section>
 
-    <section class="retrieve-success empty" v-else-if="books.length <= 0">
+    <section class="retrieve-success empty" v-else-if="booksData.books.length <= 0">
         <p>No Books Found. Add one!</p>
     </section>
 
     <section class="retrieve-success" v-else>
-        <div v-for="book in books" :key="book.id">
+        <section v-for="book in booksData.books" :key="book.id" :id="`${book.title}-${book.id}`">
             <p><RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">{{ book.title }}</RouterLink></p>
             <p><img :src="book.image_source" :alt="book.title" style="max-width: 200px; max-height: 200px;"></p>
-        </div>
+        </section>
+
+        <section class="pagination buttons" v-if="booksData.total_pages > 1">
+            <button type="button" @click="prevPage" :disabled="booksData.current_page <= 1">Previous</button>
+            <span>Page {{ booksData.current_page }} of {{ booksData.total_pages }}</span>
+            <button type="button" @click="nextPage" :disabled="booksData.current_page >= booksData.total_pages">Next</button>
+        </section>
     </section>
 </section>
 </template>
 
 <script setup>
 import { useUserStore } from '@/stores/user';
-import { reactive, ref, onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
+import { reactive, onMounted } from 'vue';
+import { RouterLink, useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 
+const route = useRoute();
+const router = useRouter();
 const user = useUserStore();
 const feedback = reactive({ message: '', success: false });
 const isLoading = reactive({ page: false });
-const books = ref([]);
+const booksData = reactive({
+    books: [],
+    current_page: 1,
+    total_pages: 1
+});
 
 // Retrieve books
-const retrieveBooks = async () => {
+const retrieveBooks = async (page = 1) => {
     isLoading.page = true;
 
     try {
-        const response = await axios.get(`/api/book/all-books/${user.user.id}`);
+        const response = await axios.get(`/api/book/all-books/${user.user.id}`, { params: { page }});
         console.log(response.data.message);
         console.log(`Response data information:`, response);
 
         feedback.success = true;
         feedback.message = response.data.message;
 
-        books.value = response.data.books;
+        // Retrieve values and store them into variables
+        booksData.books = response.data.books;
+        booksData.current_page = response.data.current_page;
+        booksData.total_pages = response.data.total_pages;
 
     } catch (error) {
         console.error(`An error occured while retrieving the user's books`);
@@ -65,7 +80,25 @@ const retrieveBooks = async () => {
     }
 }
 
+const nextPage = () => {
+    if (booksData.current_page < booksData.total_pages) {
+        const newPage = booksData.current_page + 1;
+        router.push({ name: 'books', query: { page: newPage } }); // update URL
+        retrieveBooks(newPage);
+    }
+};
+
+const prevPage = () => {
+    if (booksData.current_page > 1) {
+        const newPage = booksData.current_page - 1;
+        router.push({ name: 'books', query: { page: newPage } }); // update URL
+        retrieveBooks(newPage);
+    }
+};
+
+// Retrieve books automatically on page visit
 onMounted(async () => {
-    await retrieveBooks();
+    const pageFromUrl = parseInt(route.query.page) || 1;
+    retrieveBooks(pageFromUrl);
 });
 </script>
