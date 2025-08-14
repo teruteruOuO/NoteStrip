@@ -11,6 +11,7 @@ import authentication from './routes/authentication';
 import passwordRecovery from './routes/password-recovery';
 import account from './routes/account';
 import book from './routes/book';
+import dashboard from './routes/dashboard';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/authentication', authentication);
 app.use('/api/password-recovery', passwordRecovery);
 app.use('/api/account', account);
 app.use('/api/book', book);
+app.use('/api/dashboard', dashboard);
 app.use(errorHandler); // Global error handler (should be after routes)
 
 export default app;

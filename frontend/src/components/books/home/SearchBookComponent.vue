@@ -91,7 +91,7 @@ const debounceSearch = (title) => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         searchBook(title);
-    }, 1000); // wait 1s after typing stops
+    }, 1000 * 0.5); // wait 0.5s after typing stops
 };
 
 // The code below clears the input bar and books result once anything in the page is clicked
