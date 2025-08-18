@@ -1,0 +1,85 @@
+<template>
+<section id="contact" class="component">
+    <p>Got a feedback in mind? Share it with us!</p>
+    <form @submit.prevent="submitFeedback">
+        <ul>
+            <li>
+                <label for="email">Your Email: </label>
+                <input type="email" name="email" id="email" v-model="contactForm.email" placeholder="optional" />
+            </li>
+            <li>
+                <label for="title">Title: </label>
+                <input type="text" name="title" id="title" v-model="contactForm.title" placeholder="required" required />
+            </li>
+            <li>
+                <label for="content">Content: </label>
+                <textarea name="content" id="content" v-model="contactForm.content" placeholder="required" required>
+                </textarea>
+            </li>
+            <li>
+                <button type="submit" :disabled="isLoading.form" :class="{ 'button-loading': isLoading.form }">
+                    <span v-if="!isLoading.form">Submit</span>
+                    <span v-else>Submitting...</span>
+                </button>
+            </li>
+        </ul>
+    </form>
+
+    <section class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
+        <p>{{ feedback.message }}</p>
+    </section>
+</section>    
+</template>
+
+<script setup>
+import { reactive } from 'vue';
+import axios from 'axios';
+
+const feedback = reactive({ message: '', success: false });
+const isLoading = reactive({ form: false });
+const contactForm = {
+    email: '',
+    title: null,
+    content: null
+}
+
+const submitFeedback = async () => {
+    isLoading.form = true;
+
+    try {
+        const body = {
+            email: contactForm.email.trim() === '' ? 'anonymous' : contactForm.email,
+            title: contactForm.title,
+            content: contactForm.content
+        }
+        const response = await axios.post(`/api/authentication/contact-us`, body);
+        console.log(response.data.message);
+        console.log(`Response data information:`, response);
+
+        feedback.success = true;
+        feedback.message = response.data.message;
+
+        contactForm.email = '';
+        contactForm.title = null;
+        contactForm.content = null;
+
+    } catch (error) {
+        console.error(`An error occured while logging in user`);
+        feedback.success = false;
+
+        // Handle errors returned from the backend
+        if (error.response) {
+            console.error("Backend error:", error.response);
+            feedback.message = error.response.data.message;
+
+        // Handle unexpected errors
+        } else {
+            console.error("Unexpected error:", error.message);
+            feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
+        }
+
+    } finally {
+        isLoading.form = false;
+    }
+}
+</script>

@@ -3,8 +3,10 @@ import { AppError, IDecodedTokenPayload } from '../../types/types';
 import { DatabaseScript } from '../models/database-script';
 import { LoginConfiguration } from '../config/login';
 import { neutralizeString } from '../miscellaneous/neutralize-string';
+import { EmailConfiguration } from '../config/email';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 // Login user
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -225,4 +227,54 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     } catch (err: unknown) {
         next(err);
     }
+}
+
+// Unrelated: Sent user feedback to the DEV's email
+export const submitFeedback = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        type Feedback = { email: string | 'anonymous', title: string, content: string };
+        let { email, title, content } = req.body as Feedback;
+        let error: AppError;
+        let emailInstance: EmailConfiguration;
+        let transporter = nodemailer.createTransport(EmailConfiguration.systemEmail);
+
+        console.log('Processing submitFeedback...');
+
+        console.log(`Checking if submitter has email, title, or content`);
+        if (!email || !title || !content) {
+            error = new Error("Submitter does not have email, title, or content in the request body");
+            error.status = 404;
+            error.frontend_message = `You must provide your email (optional) and the content's title and body`
+            throw error;
+        }
+        console.log(`Found the email, title, and content in the submitter's form!`);
+
+        email = neutralizeString(email, true);
+
+        // Send the email content to the DEV's email
+        console.log(`Sending the submitter's (${email}) feedback to the DEV`);
+        emailInstance = new EmailConfiguration(
+            EmailConfiguration.devEmail, 
+            `User Feedback: ${title} by ${email}`, 
+            "text",
+            content 
+        );
+        transporter.sendMail(emailInstance.getMailOptions(), async (err, info) => {
+            if (err) {
+                error = new Error(`An error occured while sending the submitter's feedback to the dev's email`);
+                error.status = 500;
+                error.frontend_message = "A server error occured while submitting your feedback to the developer. Please Try Again";
+                throw error;
+
+            } else {
+                console.log(`Successfully sent the submitter's feedback to the developer!`);
+                res.status(200).json({ message: `Thank you for your feedback` });
+                return;
+            }
+        });
+
+    } catch (err: unknown) {
+        next(err);
+    }
+
 }

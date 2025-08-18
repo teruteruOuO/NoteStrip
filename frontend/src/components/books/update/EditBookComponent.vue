@@ -12,20 +12,6 @@
             <button type="button" @click="goBack">Go Back</button>
         </section>
 
-        <!-- Only for checking the current values of variables; will be deleted later -->
-        <section id="variables">
-            <p><span>ID:</span> {{ bookInformation.id }} </p>
-            <p><span>Title: </span>{{ bookInformation.title }} </p>
-            <p><span>Plot Description: </span>{{ bookInformation.plot_description }} </p>
-            <p><span>Extra Information:</span> {{ bookInformation.extra_information }} </p>
-            <p><span>Release Date:</span> {{ bookInformation.release_date }} </p>
-            <p><span>End Date:</span> {{ bookInformation.end_date }} </p>
-            <p><span>Image from Input:</span> {{ bookInformation.img.input }} </p>
-            <p><span>Image from Preview URL:</span> {{ bookInformation.img.previewUrl }} </p>
-            <p><span>Image from DB:</span> {{ bookInformation.img.db }} </p>
-            <p><span>Image from S3:</span> {{ bookInformation.img.s3 }} </p>
-        </section>
-
         <!-- This is the form -->
          <form @submit.prevent="updateBook">
             <ul>

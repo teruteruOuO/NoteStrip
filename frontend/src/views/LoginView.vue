@@ -3,6 +3,7 @@
     <LoginComponent />
     <section>
         <p><RouterLink :to="{ name: 'password-recovery' }">Forgot Password?</RouterLink></p>
+        <p><RouterLink :to="{ name: 'sign-up' }">Sign Up</RouterLink></p>
     </section>
 </main>
 </template>

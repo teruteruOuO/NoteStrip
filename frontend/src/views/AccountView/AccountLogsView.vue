@@ -11,19 +11,15 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Type</th>
-                    <th>Description</th>
                     <th>Time</th>
+                    <th>Description</th>
                 </tr>
             </thead>
 
             <tbody>
                 <tr v-for="log in logData.activity_logs" :key="log.id">
-                    <td>{{ log.id }}</td>
-                    <td>{{ log.type }}</td>
-                    <td>{{ log.description }}</td>
                     <td>{{ log.timestamp }}</td>
+                    <td>{{ log.description }}</td>
                 </tr>
             </tbody>
         </table>

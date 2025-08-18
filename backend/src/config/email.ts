@@ -4,6 +4,8 @@ dotenv.config();
 
 export class EmailConfiguration {
     // Readonly shared configuration for all instances
+    public static readonly devEmail: string = process.env.MY_EMAIL || 'noemail@gmail.com'
+
     public static readonly systemEmail: IEmail = {
         service: "gmail",
         auth: {

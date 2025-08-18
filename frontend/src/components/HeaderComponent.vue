@@ -3,10 +3,9 @@
     <h1>Note Strip</h1>
     <nav>
         <ul>
-            <li><RouterLink :to="{ name: 'home' }">Home</RouterLink></li>
             <li><RouterLink :to="{ name: 'about' }">About</RouterLink></li>
+            <li><RouterLink :to="{ name: 'contact-us' }">Contact Us</RouterLink></li>
 
-            <li v-if="!user.user.id"><RouterLink :to="{ name: 'sign-up' }">Sign Up</RouterLink></li>
             <li v-if="!user.user.id"><RouterLink :to="{ name: 'login' }">Login</RouterLink></li>
 
             <li v-if="user.user.id"><RouterLink :to="{ name: 'books' }">Books</RouterLink></li>
