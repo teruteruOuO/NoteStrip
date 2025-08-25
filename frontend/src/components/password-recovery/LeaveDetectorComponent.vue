@@ -1,6 +1,5 @@
+<!-- eslint-disable vue/valid-template-root -->
 <template>
-<section>
-</section>
 </template>
 
 <script setup>

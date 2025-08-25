@@ -1,6 +1,5 @@
 <template>
 <main id="sign-up" class="view">
-    <h1>Sign up view</h1>
     <SignupFormComponent v-if="signup.component.signup_form"/>
     <VerifyCodeComponent v-else-if="signup.component.verification_form"/>
 </main>

@@ -19,7 +19,7 @@
         </ul>
     </form>
 
-    <section class="feedback fail">
+    <section class="feedback fail" ref="feedbackScroll" v-if="feedback.message || passwordMatch || passwordRegEx">
         <p>{{ feedback.message }}</p>
         <p>{{ passwordRegEx }}</p>
         <p>{{ passwordMatch }}</p>
@@ -32,13 +32,14 @@
 <script setup>
 import LeaveDetectorComponent from './LeaveDetectorComponent.vue';
 import { usePasswordRecoveryStore } from '@/stores/password-recovery';
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const passwordRecovery = usePasswordRecoveryStore();
 const router = useRouter();
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 const isLoading = reactive({ form: false });
 
 /* Computed Variables */
@@ -76,6 +77,10 @@ const changePassword = async() => {
         // If the error messages for password constraints still exist, refuse to continue
         if (passwordMatch.value || passwordMatch.value) {
             console.error("The password must follow the password rules before you can continue.");
+
+            await nextTick();
+            feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
             return;
         }
 
@@ -112,6 +117,9 @@ const changePassword = async() => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.form = false;

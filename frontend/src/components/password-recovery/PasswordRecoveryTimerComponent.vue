@@ -1,6 +1,6 @@
 <template>
-<section id="password-recovery-timer" class="component">
-    <p>Time remaining until the verification code expires: {{ formattedTime }}</p>
+<section id="password-recovery-timer" class="component timer">
+    <p>Expiration Timer: {{ formattedTime }}</p>
     <p v-if="passwordRecovery.component.timer.time_left <= 0">
         Current verification code expired. Please resend a new one.
     </p>

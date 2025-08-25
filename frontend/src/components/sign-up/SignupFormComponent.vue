@@ -23,7 +23,7 @@
         </ul>
     </form>
 
-    <section class="feedback fail">
+    <section class="feedback fail" ref="feedbackScroll" v-if="feedback.message || passwordMatch || passwordRegEx">
         <p>{{ feedback.message }}</p>
         <p>{{ passwordRegEx }}</p>
         <p>{{ passwordMatch }}</p>
@@ -35,11 +35,12 @@
 <script setup>
 import axios from 'axios';
 import { useSignupStore } from '@/stores/sign-up';
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref, nextTick } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 
 const signup = useSignupStore();
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 const isLoading = reactive({ form: false });
 
 /* Computed Variables */
@@ -77,6 +78,10 @@ const signupUser = async() => {
         // If the error messages for password constraints still exist, refuse to continue
         if (passwordMatch.value || passwordMatch.value) {
             console.error("The password must follow the password rules before you can continue.");
+
+            await nextTick();
+            feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
             return;
         }
 
@@ -116,6 +121,9 @@ const signupUser = async() => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.form = false;

@@ -4,7 +4,7 @@
         <ul>
             <li>
                 <label for="email">Email: </label>
-                <input type="email" id="email" name="email" placeholder="required" v-model="account.email" required />
+                <input type="email" id="email" name="email" v-model="account.email" required />
             </li>
             <li>
                 <label for="password">Password: </label>
@@ -19,22 +19,29 @@
         </ul>
     </form>
 
-    <section class="feedback fail">
+    <section class="feedback fail" ref="feedbackScroll" v-if="feedback.message">
         <p>{{ feedback.message }}</p>
+    </section>
+
+    <section>
+        <p><RouterLink :to="{ name: 'password-recovery' }">Forgot Password?</RouterLink></p>
+        <p><RouterLink :to="{ name: 'sign-up' }">Sign Up</RouterLink></p>
     </section>
 </section>
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref, nextTick } from 'vue';
 import { useUserStore } from '@/stores/user';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { RouterLink } from 'vue-router';
 
 const user = useUserStore();
 const router = useRouter();
 const account = reactive({ email: '', password: '' });
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 const isLoading = reactive({ form: false });
 
 // Login user
@@ -67,6 +74,9 @@ const loginUser = async () => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.form = false;

@@ -1,5 +1,5 @@
 <template>
-<main id="enter-code" class="component">
+<section id="enter-code" class="component">
     <form @submit.prevent="sendVerificationCode">
         <ul>
             <li>
@@ -15,20 +15,21 @@
         </ul>
     </form>
 
-    <section class="feedback fail">
+    <section class="feedback fail" ref="feedbackScroll" v-if="feedback.message">
         <p>{{ feedback.message }}</p>
     </section>
-</main>
+</section>
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref, nextTick } from 'vue';
 import { usePasswordRecoveryStore } from '@/stores/password-recovery';
 import axios from 'axios';
 
 const passwordRecovery = usePasswordRecoveryStore();
 const isLoading = reactive({ form: false });
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 
 // Send a make a verification code to the user
 const sendVerificationCode = async () => {
@@ -65,6 +66,9 @@ const sendVerificationCode = async () => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.form = false;

@@ -1,6 +1,10 @@
 <template>
 <section id="homepage" class="component">
+    <section id="notestrip-logo">
+        <img src="../../public/images/Cat.png" alt="notestrip-cat">
+    </section>
     <nav>
+        <h1>NoteStrip</h1>
         <ul>
             <li><RouterLink :to="{ name: 'about' }">About</RouterLink></li>
             <li><RouterLink :to="{ name: 'contact-us' }">Contact Us</RouterLink></li>

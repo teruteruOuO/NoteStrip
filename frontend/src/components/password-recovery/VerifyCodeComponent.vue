@@ -31,7 +31,7 @@
         </ul>
     </form>
 
-    <section class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }">
+    <section class="feedback" ref="feedbackScroll" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
         <p>{{ feedback.message }}</p>
     </section>
 
@@ -43,12 +43,13 @@
 import PasswordRecoveryTimerComponent from './PasswordRecoveryTimerComponent.vue';
 import LeaveDetectorComponent from './LeaveDetectorComponent.vue';
 import { usePasswordRecoveryStore } from '@/stores/password-recovery';
-import { reactive } from 'vue';
+import { reactive, ref, nextTick } from 'vue';
 import axios from 'axios';
 
 const passwordRecovery = usePasswordRecoveryStore();
 const isLoading = reactive({ verify: false, resend: false });
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 
 // Resend a new verification code
 const resendVerificationCode = async () => {
@@ -84,6 +85,9 @@ const resendVerificationCode = async () => {
         }
 
     } finally {
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
         isLoading.resend = false;
     }
 }
@@ -126,6 +130,9 @@ const verifyVerificationCode = async () => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.verify = false;

@@ -37,7 +37,7 @@
         </ul>
     </form>
 
-    <section class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }">
+    <section class="feedback" ref="feedbackScroll" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
         <p>{{ feedback.message }}</p>
     </section>
 
@@ -49,13 +49,14 @@
 import { useSignupStore } from '@/stores/sign-up';
 import SignupTimerComponent from './SignupTimerComponent.vue';
 import LeaveDetectorComponent from './LeaveDetectorComponent.vue';
-import { reactive } from 'vue';
+import { reactive, ref, nextTick } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 const signup = useSignupStore();
 const router = useRouter();
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 const isLoading = reactive({
     reset: false,
     resend: false,
@@ -102,6 +103,9 @@ const resetEmail = async () => {
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
 
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
     } finally {
         isLoading.reset = false;
     }
@@ -141,6 +145,9 @@ const resendVerificationCode = async () => {
         }
 
     } finally {
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
         isLoading.resend = false;
     }
 }
@@ -181,6 +188,9 @@ const verifyVerificationCode = async () => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.verify = false;

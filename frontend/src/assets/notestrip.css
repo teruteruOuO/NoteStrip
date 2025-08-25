@@ -1,9 +1,19 @@
+/*
+##############################################
+##############################################
+######                                  ######
+######          General Styles          ######
+######                                  ######
+##############################################
+##############################################
+*/
+/* Components */
 .feedback.success, .feedback .success {
-    color: green;
+    color: #B8F4BC;
 }
 
 .feedback.fail, .feedback .fail {
-    color: red;
+    color: #f8545c;
 }
 
 tr.selectable:hover {
@@ -12,5 +22,635 @@ tr.selectable:hover {
 }
 
 .component {
-    border: 1px solid black;
+    /* border: 1px solid red; */
+    margin-block-start: 3%;
+}
+
+/* Page */
+html {
+    background-color: #2A3652;
+    color: white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #B8F4BC;
+}
+
+/* Links */
+a {
+    color: white;
+}
+
+a:link {
+    color: white;
+}
+
+a:visited {
+    color: white;
+}
+
+a:focus {
+    color: pink;
+}
+
+a:hover {
+    color: pink;
+}
+
+a:active {
+    color: red;
+}
+
+/* Form */
+label, input, textarea {
+    font-size: 1rem;
+}
+
+input {
+    min-inline-size: 280px;
+    min-block-size: 50px;
+    border: 2px solid black;
+    text-align: center;
+    border-radius: 20px;
+}
+
+label.text-area, textarea {
+    display: block;
+}
+
+label.text-area {
+    text-align: center;
+}
+
+textarea {
+    min-inline-size: 350px;
+    min-block-size: 400px;
+    border: 2px solid black;
+    text-align: left;
+    border-radius: 20px;
+    resize: vertical;
+    padding-inline: 10px;
+}
+
+form > ul {
+    display: contents;  /* Form will act as if LI (lists) is its direct children */
+}
+
+form button {
+    min-inline-size: 350px;
+    min-block-size: 38px;
+    
+    background-color: #B8F4BC;
+    border-radius: 20px;
+    border: 2px solid black;
+}
+
+.button-loading {
+    background-color: #d6f8d8;
+    color: rgb(46, 46, 46);
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+######             Header               ######
+######                                  ######
+##############################################
+##############################################
+*/
+header {
+    max-inline-size: 340px;
+    margin-inline: auto;
+}
+
+header .logo {
+    /* Flex */
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+    align-items: center;
+    column-gap: 3%;
+}
+
+/* Navigation Child: Logo */
+header img {
+    max-block-size: 133px;
+    max-inline-size: 176.52px;
+}
+
+header h1 {
+    font-size: 1.875rem;
+}
+
+/* Navigation Child: Lists */
+header ul {
+    /* Flex */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+header ul > li {
+    text-align: center;
+}
+
+/* Header child: button */
+header button {
+    display: block;
+    inline-size: 100%;
+    
+    background-color: #B8F4BC;
+    border-radius: 20px;
+    font-weight: bolder;
+    border: 2px solid black;
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+######             Homepage             ######
+######                                  ######
+##############################################
+##############################################
+*/
+main#home {
+    min-height: 100vh;      /* makes section fill the whole viewport height */
+    display: flex;           /* make it flex */
+    justify-content: center; /* center horizontally */
+    align-items: center;     /* center vertically */
+}
+
+section#homepage {
+    /* Flexbox */
+    display: flex;
+    flex-direction: column;
+
+    /* Text */
+    text-align: center;
+
+    /* Box */
+    margin-block-start: 0px;
+}
+
+section#homepage img {
+    inline-size: 391px;
+    block-size: 295px;
+}
+
+section#homepage h1 {
+    font-size: 3.75rem;
+    margin-block-end: 30px;
+}
+
+section#homepage li:first-child {
+    margin-block-start: 0px;
+}
+
+section#homepage li {
+    margin-block-start: 20px;
+}
+
+section#homepage a {
+    font-size: 2.1875rem;
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+######          Contact Us              ######
+######                                  ######
+##############################################
+##############################################
+*/
+section#contact p {
+    font-size: calc(23 / 16 * 1rem);
+    text-align: center;
+    margin-block-end: 15px;
+}
+
+section#contact form {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+
+section#contact li:nth-of-type(1), 
+section#contact li:nth-of-type(2),
+section#contact li:nth-of-type(4)  {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+section#contact textarea {
+    margin-inline: auto;
+    margin-block-start: 10px;
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+###### Login, Signup, Password-Recovery ######
+######                                  ######
+##############################################
+##############################################
+*/
+main#login,
+main#sign-up, 
+main#password-recovery {
+    min-height: 60vh;      /* makes section fill the whole viewport height */
+    display: flex;           /* make it flex */
+    justify-content: center; /* center horizontally */
+    align-items: center;     /* center vertically */
+}
+
+section#login-form,
+section#sign-up-form,
+section#verify-code,
+section#enter-code,
+section#change-password {
+    inline-size: 100%;
+}
+
+section#login-form form,
+section#sign-up-form form,
+section#verify-code form,
+section#enter-code form,
+section#change-password form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+section#login-form form li > label,
+section#sign-up-form form li > label,
+section#verify-code form li > label,
+section#enter-code form li > label,
+section#change-password form li > label {
+    display: block;
+}
+
+section#login-form form li > button,
+section#sign-up-form form li > button,
+section#verify-code form li > button,
+section#enter-code form li > button,
+section#change-password form li > button   {
+    min-inline-size: 280px;
+    min-block-size: 50px;
+}
+
+section#login-form section,
+section#sign-up-form section,
+section#verify-code section,
+section#enter-code section,
+section#change-password section {
+    margin-block-start: 20px;
+    text-align: center;
+}
+
+section.timer {
+    margin-block-end: 20px;
+}
+
+section.feedback > p {
+    margin-block-end: 20px;
+}
+
+section.feedback > p:last-of-type {
+    margin-block-end: 0px;
+}
+
+
+/*
+##############################################
+##############################################
+######                                  ######
+######          Media Queries           ######
+######                                  ######
+##############################################
+##############################################
+*/
+/* ≥ 667px — Phone Horizontal / small landscape phones */
+@media screen and (min-width: 667px) and (orientation: landscape) {
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Header               ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    header {
+        all: revert;
+    }
+
+    /* Navigation Parent */
+    header nav {
+        /* Flex */
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    /* Navigation Child: Logo */
+    header .logo {
+        /* Flex */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center;
+        column-gap: 3%;    
+    }
+
+    header img {
+        max-block-size: 136px;
+        max-inline-size: 182px;
+    }
+
+    header h1 {
+        font-size: 1.875rem;
+    }
+    
+    /* Navigation Child: List */
+    header ul {
+        /* Grid */
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+    }
+
+    header ul > li {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Homepage             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#homepage {
+        /* Flexbox */
+        flex-direction: row;
+    }
+
+    section#homepage #notestrip-logo {
+        display: flex;           /* make it flex */
+        justify-content: center; /* center horizontally */
+        align-items: center;     /* center vertically */
+    }
+
+    section#homepage img {
+        inline-size: 302px;
+        block-size: 228px;
+    }
+
+    section#homepage h1 {
+        font-size: 3.125rem;
+    }
+
+    section#homepage nav {
+        padding-inline: 40px;
+    }
+
+    section#homepage a {
+        font-size: 1.5625rem;
+    }
+}
+
+/* ≥ 768px — Tablet Vertical */
+@media screen and (min-width: 768px) and (orientation: portrait) {
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######          General Styles          ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    input {
+        min-inline-size: 350px;
+    }
+
+    textarea {
+        min-inline-size: 400px;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Header               ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    header {
+        all: revert;
+    }
+
+    /* Navigation Parent */
+    header nav {
+        /* Flex */
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    /* Navigation Child: Logo */
+    header .logo {
+        /* Flex */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center;
+        column-gap: 3%;    
+    }
+
+    header img {
+        max-block-size: 214px;
+        max-inline-size: 162px;
+    }
+
+    header h1 {
+        font-size: 1.875rem;
+    }
+    
+    /* Navigation Child: List */
+    header ul {
+        /* Grid */
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+    }
+
+    header ul > li {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    header li > a {
+        font-size: 1.25rem;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Homepage             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#homepage img {
+        inline-size: 484px;
+        block-size: 365px;
+    }
+
+    section#homepage h1 {
+        font-size: 4.6875rem;
+    }
+
+    section#homepage nav {
+        margin-block-start: 50px;
+    }
+
+    section#homepage a {
+        font-size: 2.5rem;
+    }
+}
+
+/* ≥ 1024px — Tablet Horizontal (also small laptops) */
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######          General Styles          ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    input {
+        min-inline-size: 400px;
+    }
+
+    textarea {
+        min-inline-size: 450px;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Header               ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    header img {
+        max-block-size: 257px;
+        max-inline-size: 194px;
+    }
+
+    header h1 {
+        font-size: 2.8125rem;
+    }
+
+    header li > a {
+        font-size: 1.5625rem;
+    }
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Homepage             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#homepage {
+        column-gap: 50px;
+    }
+
+    section#homepage img {
+        inline-size: 484px;
+        block-size: 365px;
+    }
+
+    section#homepage nav {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;  
+    }
+
+    section#homepage h1 {
+        font-size: 4.6875rem;
+    }
+
+    section#homepage a {
+        font-size: 2.5rem;
+    }
+}
+
+/* ≥ 1920px — Desktop (Full HD and up) */
+@media screen and (min-width: 1500px) {
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######             Homepage             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#homepage {
+        column-gap: 50px;
+    }
+
+    section#homepage img {
+        inline-size: 941px;
+        block-size: 709px;
+    }
+
+    section#homepage h1 {
+        font-size: 6.25rem;
+    }
+
+    section#homepage a {
+        font-size: 3.125rem;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ###### Login, Signup, Password-Recovery ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    main#login,
+    main#sign-up, 
+    main#password-recovery {
+        min-height: 40vh;      
+    }
 }

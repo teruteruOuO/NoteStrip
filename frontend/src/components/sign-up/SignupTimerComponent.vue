@@ -1,6 +1,6 @@
 <template>
-<section id="sign-up-timer" class="component">
-    <p>Time remaining until the verification code expires: {{ formattedTime }}</p>
+<section id="sign-up-timer" class="component timer">
+    <p>Expiration Timer: {{ formattedTime }}</p>
     <p v-if="signup.component.timer.time_left <= 0">
         Current verification code expired. Please resend a new one.
     </p>

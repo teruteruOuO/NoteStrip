@@ -1,19 +1,24 @@
 <template>
 <section id="contact" class="component">
-    <p>Got a feedback in mind? Share it with us!</p>
+    <p>Got a feedback? Share it with us!</p>
+
+    <section class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
+        <p>{{ feedback.message }}</p>
+    </section>
+
     <form @submit.prevent="submitFeedback">
         <ul>
             <li>
-                <label for="email">Your Email: </label>
-                <input type="email" name="email" id="email" v-model="contactForm.email" placeholder="optional" />
+                <label for="email">Email: </label>
+                <input type="email" name="email" id="email" v-model="contactForm.email" placeholder="Optional" />
             </li>
             <li>
                 <label for="title">Title: </label>
-                <input type="text" name="title" id="title" v-model="contactForm.title" placeholder="required" required />
+                <input type="text" name="title" id="title" v-model="contactForm.title" placeholder="Required" required />
             </li>
             <li>
-                <label for="content">Content: </label>
-                <textarea name="content" id="content" v-model="contactForm.content" placeholder="required" required>
+                <label for="content" class="text-area">Feedback: </label>
+                <textarea name="content" id="content" v-model="contactForm.content" placeholder="Required" required>
                 </textarea>
             </li>
             <li>
@@ -24,10 +29,6 @@
             </li>
         </ul>
     </form>
-
-    <section class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
-        <p>{{ feedback.message }}</p>
-    </section>
 </section>    
 </template>
 
