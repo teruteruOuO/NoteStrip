@@ -96,6 +96,7 @@ form > ul {
     display: contents;  /* Form will act as if LI (lists) is its direct children */
 }
 
+/* Button */
 form button {
     min-inline-size: 350px;
     min-block-size: 38px;
@@ -108,6 +109,31 @@ form button {
 .button-loading {
     background-color: #d6f8d8;
     color: rgb(46, 46, 46);
+}
+
+/* 1) Interactive states only when NOT disabled */
+button:not(:disabled):hover,
+button:not(:disabled):focus {
+    background-color: #d5fdd8;
+    border-color: rgb(32, 32, 32);
+    color: rgb(32, 32, 32);
+}
+
+button:not(:disabled):active {
+    background-color: #eafaeb;
+}
+
+/* 2) Base disabled look (and kill mouse events) */
+button:disabled,
+button[disabled],
+button[aria-disabled="true"],
+input:disabled,
+input[disabled],
+input[aria-disabled="true"] {
+  opacity: 0.6;                 /* or your preferred styling */
+  cursor: not-allowed;
+  pointer-events: none;         /* prevents hover/active from firing */
+  /* keep your existing size/radius/border if desired */
 }
 
 /*
@@ -237,7 +263,6 @@ section#contact form {
     gap: 11px;
 }
 
-
 section#contact li:nth-of-type(1), 
 section#contact li:nth-of-type(2),
 section#contact li:nth-of-type(4)  {
@@ -257,14 +282,17 @@ section#contact textarea {
 ##############################################
 ######                                  ######
 ###### Login, Signup, Password-Recovery ######
+###### Password Change, Email Change    ######
 ######                                  ######
 ##############################################
 ##############################################
 */
 main#login,
 main#sign-up, 
-main#password-recovery {
-    min-height: 60vh;      /* makes section fill the whole viewport height */
+main#password-recovery,
+main#account-password,
+main#account-email {
+    min-height: 60vh;    
     display: flex;           /* make it flex */
     justify-content: center; /* center horizontally */
     align-items: center;     /* center vertically */
@@ -274,7 +302,9 @@ section#login-form,
 section#sign-up-form,
 section#verify-code,
 section#enter-code,
-section#change-password {
+section#change-password,
+section#password-change,
+section#email-change {
     inline-size: 100%;
 }
 
@@ -282,7 +312,9 @@ section#login-form form,
 section#sign-up-form form,
 section#verify-code form,
 section#enter-code form,
-section#change-password form {
+section#change-password form,
+section#password-change form,
+section#email-change form {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -293,7 +325,9 @@ section#login-form form li > label,
 section#sign-up-form form li > label,
 section#verify-code form li > label,
 section#enter-code form li > label,
-section#change-password form li > label {
+section#change-password form li > label,
+section#password-change form li > label,
+section#email-change form li > label {
     display: block;
 }
 
@@ -301,7 +335,9 @@ section#login-form form li > button,
 section#sign-up-form form li > button,
 section#verify-code form li > button,
 section#enter-code form li > button,
-section#change-password form li > button   {
+section#change-password form li > button,
+section#password-change form li > button,
+section#email-change form li > button  {
     min-inline-size: 280px;
     min-block-size: 50px;
 }
@@ -310,7 +346,9 @@ section#login-form section,
 section#sign-up-form section,
 section#verify-code section,
 section#enter-code section,
-section#change-password section {
+section#change-password section,
+section#password-change section,
+section#email-change section  {
     margin-block-start: 20px;
     text-align: center;
 }
@@ -325,6 +363,33 @@ section.feedback > p {
 
 section.feedback > p:last-of-type {
     margin-block-end: 0px;
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+######          Account: Logs           ######
+######                                  ######
+##############################################
+##############################################
+*/
+/* Table design is inside LogComponent.vue */
+section#logs .pagination {
+    margin-block-start: 20px;
+
+    /* Flex */
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+}
+
+section#logs .pagination > button {
+    background-color: #B8F4BC;
+    border-radius: 20px;
+    border: 2px solid black;
+    padding-inline: 20px;
 }
 
 
@@ -644,13 +709,16 @@ section.feedback > p:last-of-type {
     ##############################################
     ######                                  ######
     ###### Login, Signup, Password-Recovery ######
+    ###### Password Change, Email Change    ######
     ######                                  ######
     ##############################################
     ##############################################
     */
     main#login,
     main#sign-up, 
-    main#password-recovery {
+    main#password-recovery,
+    main#account-password,
+    main#account-email {
         min-height: 40vh;      
     }
 }

@@ -1,6 +1,5 @@
 <template>
 <main id="account-password" class="view">
-    <h1>Account: Password View</h1>
     <PasswordChangeComponent />
 </main>
 </template>

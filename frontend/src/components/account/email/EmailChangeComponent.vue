@@ -11,53 +11,49 @@
 
     <!-- Show when retrieve success -->
     <section class="retrieve-success" v-else>
-        <section id="current-email-section">
-            <form>
-                <ul>
-                    <li>
-                        <label for="current-email">Current Email: </label>
-                        <input type="email" name="current-email" id="current-email" v-model="userInformation.current_email" disabled />
-                    </li>
-                </ul>
-            </form>
-        </section>
+        <form @submit.prevent="sendVerificationCode">
+            <ul>
+                <li>
+                    <label for="current-email">Current Email: </label>
+                    <input type="email" name="current-email" id="current-email" v-model="userInformation.current_email" disabled />
+                </li>
+                <li>
+                    <!-- Disabled if the verification form is up or if processing the submission-->
+                    <label for="new-email">New Email: </label>
+                    <input 
+                    type="email" 
+                    name="new-email" 
+                    id="new-email" 
+                    v-model="user.changeEmail.form.new_email" 
+                    required 
+                    :disabled="isLoading.new_email_form || user.changeEmail.section.verification_form"/>
+                </li>
+                <li>
+                    <!-- Disabled if the verification form is up or if processing the submission-->
+                    <button 
+                    type="submit" 
+                    :disabled="isLoading.new_email_form || user.changeEmail.section.verification_form" 
+                    :class="{ 'button-loading': isLoading.new_email_form }">
+                        <span v-if="user.changeEmail.section.verification_form">Waiting to verify...</span>
+                        <span v-else-if="!isLoading.new_email_form">Send Verification Code</span>
+                        <span v-else>Sending...</span>
+                    </button>
+                </li>
+            </ul>
+        </form>
 
-        <section id="new-email-section">
-            <form @submit.prevent="sendVerificationCode">
-                <ul>
-                    <li>
-                        <!-- Disabled if the verification form is up or if processing the submission-->
-                        <label for="new-email">New Email: </label>
-                        <input 
-                        type="email" 
-                        name="new-email" 
-                        id="new-email" 
-                        v-model="user.changeEmail.form.new_email" 
-                        required 
-                        :disabled="isLoading.new_email_form || user.changeEmail.section.verification_form"/>
-                    </li>
-                    <li>
-                        <!-- Disabled if the verification form is up or if processing the submission-->
-                        <button 
-                        type="submit" 
-                        :disabled="isLoading.new_email_form || user.changeEmail.section.verification_form" 
-                        :class="{ 'button-loading': isLoading.new_email_form }">
-                            <span v-if="user.changeEmail.section.verification_form">Waiting to verify...</span>
-                            <span v-else-if="!isLoading.new_email_form">Send Verification Code</span>
-                            <span v-else>Sending...</span>
-                        </button>
-                    </li>
-                </ul>
-            </form>
-
-            <section class="feedback" :class="{ 'success': feedback.new_email_form.success, 'fail': !feedback.new_email_form.success}">
-                <p>{{ feedback.new_email_form.message }}</p>
-            </section>
+        <section
+        ref="feedbackNewEmailScroll" 
+        class="feedback" 
+        :class="{ 'success': feedback.new_email_form.success, 'fail': !feedback.new_email_form.success}"
+        v-if="feedback.new_email_form.message"
+        >
+            <p>{{ feedback.new_email_form.message }}</p>
         </section>
 
         <EmailTimerComponent v-if="user.changeEmail.timer.start" :key="user.changeEmail.timer.id"/>
 
-        <section id="verification-code-form" v-if="user.changeEmail.section.verification_form">
+        <section id="verification-code-form" ref="verificationCodeFormScroll" v-if="user.changeEmail.section.verification_form">
             <form @submit.prevent="verifyVerificationCode">
                 <ul>
                     <li>
@@ -92,7 +88,11 @@
                 </ul>
             </form>
 
-            <section class="feedback" :class="{ 'success': feedback.verification_code_form.success, 'fail': !feedback.verification_code_form.success}">
+            <section 
+            ref="feedbackVerificationCodeFormScroll"
+            class="feedback" 
+            :class="{ 'success': feedback.verification_code_form.success, 'fail': !feedback.verification_code_form.success}"
+            v-if="feedback.verification_code_form.message">
                 <p>{{ feedback.verification_code_form.message }}</p>
             </section>
         </section>
@@ -105,7 +105,7 @@
 <script setup>
 import LeaveDetectorComponent from './LeaveDetectorComponent.vue';
 import EmailTimerComponent from './EmailTimerComponent.vue';
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, ref, nextTick } from 'vue';
 import { useUserStore } from '@/stores/user';
 import axios from 'axios';
 
@@ -134,6 +134,9 @@ const feedback = reactive({
         success: false
     }
 });
+const feedbackNewEmailScroll = ref(null);
+const verificationCodeFormScroll = ref(null);
+const feedbackVerificationCodeFormScroll = ref(null);
 
 // Reset all variables in this component only
 const resetVariables = () => {
@@ -203,6 +206,15 @@ const sendVerificationCode = async () => {
         user.changeEmail.timer.start = true;
         user.changeEmail.timer.time_left = user.changeEmail.timer.clock;
 
+        // Remove the feedback message after 5 seconds
+        setTimeout(() => {
+            feedback.new_email_form.success = false;
+            feedback.new_email_form.message = '';
+        }, 5000);
+
+        await nextTick();
+        verificationCodeFormScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
     } catch (error) {
         console.error(`An error occured while sending a verification code to ${user.changeEmail.form.new_email}`);
         feedback.new_email_form.success = false;
@@ -217,6 +229,10 @@ const sendVerificationCode = async () => {
             console.error("Unexpected error:", error.message);
             feedback.new_email_form.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackNewEmailScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
     } finally {
         isLoading.new_email_form = false;
     }
@@ -254,7 +270,11 @@ const resendVerificationCode = async () => {
             console.error("Unexpected error:", error.message);
             feedback.verification_code_form.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
     } finally {
+        await nextTick();
+        feedbackVerificationCodeFormScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
         isLoading.verification.resend = false;
     }
 }
@@ -327,7 +347,12 @@ const verifyVerificationCode = async () => {
             console.error("Unexpected error:", error.message);
             feedback.verification_code_form.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackVerificationCodeFormScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+        
     } finally {
+
         isLoading.verification.form = false;
     }
 }

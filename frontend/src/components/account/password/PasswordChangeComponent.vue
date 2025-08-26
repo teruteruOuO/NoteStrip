@@ -23,7 +23,7 @@
         </ul>
     </form>
 
-    <section class="feedback">
+    <section class="feedback" ref="feedbackScroll" v-if="feedback.message || passwordMatch || passwordRegEx">
         <p :class="{ 'success': feedback.success, 'fail': !feedback.success }">{{ feedback.message }}</p>
         <p class="fail">{{ passwordRegEx }}</p>
         <p class="fail">{{ passwordMatch }}</p>
@@ -33,11 +33,12 @@
 
 <script setup>
 import { useUserStore } from '@/stores/user';
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref, nextTick } from 'vue';
 import axios from 'axios';
 
 const user = useUserStore();
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 const isLoading = reactive({ form: false });
 const password = reactive({
     old: '',
@@ -79,6 +80,10 @@ const changePassword = async () => {
         // If the error messages for password constraints still exist, refuse to continue
         if (passwordMatch.value || passwordMatch.value) {
             console.error("The password must follow the password rules before you can continue.");
+
+            await nextTick();
+            feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
             return;
         }
 
@@ -100,6 +105,9 @@ const changePassword = async () => {
         password.new = '';
         password.confirm = '';
 
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
     } catch (error) {
         console.error(`An error occured while changing the user's password`);
         feedback.success = false;
@@ -117,6 +125,7 @@ const changePassword = async () => {
 
     } finally {
         isLoading.form = false;
+
     }
 }
 </script>
