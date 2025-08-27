@@ -4,8 +4,10 @@
     <form @submit.prevent="retrieveBooks(booksData.limit)">
         <ul>
             <li>
-                <label for="number-of-books">Top Books Count: </label>
+                <label for="number-of-books">Placement: </label>
                 <input type="number" name="number-of-books" id="number-of-books" v-model.number="booksData.limit" min="1" max="10" required />
+            </li>
+            <li>
                 <button type="submit" :disabled="isLoading.page" :class="{ 'button-loading': isLoading.page }">
                     <span v-if="!isLoading.page">Retrieve Books</span>
                     <span v-else>Retrieving books..</span>
@@ -26,10 +28,21 @@
     </section>
 
     <section class="retrieve-success" v-else>
-        <section v-for="book in booksData.books" :key="book.id" :id="`${book.title}-${book.id}`">
-            <p><RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">{{ book.title }}</RouterLink></p>
-            <p>Total Read Count: {{ book.read_count }}</p>
-            <img :src="book.image_source" :alt="book.title" style="max-width: 200px; max-height: 200px;">
+        <section v-for="(book, index) in booksData.books" :key="index" :id="`${book.title}-${book.id}`">
+            <p>
+                <RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">
+                    {{ book.title }}
+                </RouterLink>
+            </p>
+            
+            <p>
+                <RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">
+                    <img :src="book.image_source" :alt="book.title" style="max-width: 200px; max-height: 200px;">
+                </RouterLink>
+            </p>
+            
+            <p>Top {{ index + 1 }}</p>
+            <p>Read Count: {{ book.read_count }}</p>
         </section>
     </section>
 </section>
@@ -46,7 +59,7 @@ const feedback = reactive({ message: '', success: false });
 const isLoading = reactive({ page: false });
 const booksData = reactive({
     books: [],
-    limit: 3
+    limit: 5
 });
 
 // Retrieve books

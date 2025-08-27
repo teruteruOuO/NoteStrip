@@ -67,8 +67,8 @@ label, input, textarea {
 }
 
 input {
-    min-inline-size: 280px;
-    min-block-size: 50px;
+    inline-size: 280px;
+    block-size: 50px;
     border: 2px solid black;
     text-align: center;
     border-radius: 20px;
@@ -97,9 +97,10 @@ form > ul {
 }
 
 /* Button */
+section button,
 form button {
-    min-inline-size: 350px;
-    min-block-size: 38px;
+    inline-size: 350px;
+    block-size: 38px;
     
     background-color: #B8F4BC;
     border-radius: 20px;
@@ -470,6 +471,11 @@ section#add-books-link a {
 /* Books Link: End */
 
 /* Book List: Start */
+section#retrieve-books > .empty,
+section#retrieve-books > .retrieve-fail {
+    text-align: center;
+}
+
 section#retrieve-books > .retrieve-success > .books {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -482,7 +488,6 @@ section#retrieve-books > .retrieve-success > .books > section {
     display: flex;
     flex-direction: column;
     text-align: center;
-
 }
 
 section#retrieve-books > .retrieve-success > .books > section a {
@@ -542,6 +547,98 @@ main#about > p {
     line-height: 2;
 }
 
+/*
+##############################################
+##############################################
+######                                  ######
+######            Dashboard             ######
+######                                  ######
+##############################################
+##############################################
+*/
+main#dashboard > * {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Book Read Activity: Start */
+section#book-read-activity > .buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+
+}
+
+section#book-read-activity > .buttons > button {
+    inline-size: 150px;
+    block-size: 27px;
+    border-radius: 5px;
+}
+
+section#book-read-activity > .chart-wrapper {
+    block-size: 350px;
+}
+/* Book Read Activity: End */
+
+/* Top Books: Start */
+section#top-books > h1,
+section#top-books > .retrieve-fail,
+section#top-books > .empty {
+    text-align: center;
+}
+
+section#top-books form {
+    /* Flex */
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+}
+
+section#top-books form li input {
+    inline-size: 50px;
+    block-size: 27px;
+    border-radius: 5px;
+}
+
+section#top-books form li button {
+    inline-size: 150px;
+    block-size: 27px;
+    border-radius: 5px;
+}
+
+section#top-books > .retrieve-success {
+    /* Grid */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 280px;
+    gap: 10px;
+}
+
+section#top-books > .retrieve-success > section {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+section#top-books > .retrieve-success > section a {
+    display: contents;
+}
+
+section#top-books > .retrieve-success > section p:first-of-type {
+    block-size: 25px;
+    overflow: hidden;
+}
+
+section#top-books > .retrieve-success img {
+    inline-size: 150px;
+    block-size: 200px;
+    object-fit: cover;
+    margin-inline: auto;
+}
+/* Top Books: End */
 
 /*
 ##############################################
@@ -674,11 +771,11 @@ main#about > p {
     ##############################################
     */
     input {
-        min-inline-size: 350px;
+        inline-size: 350px;
     }
 
     textarea {
-        min-inline-size: 400px;
+        inline-size: 400px;
     }
 
     /*
@@ -795,6 +892,19 @@ main#about > p {
         margin-inline: auto;
     }
 
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######            Dashboard             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    main#dashboard > * {
+        background-color: #f8545c;
+        border: 1px solid black;
+    }
 
 }
 
@@ -810,11 +920,11 @@ main#about > p {
     ##############################################
     */
     input {
-        min-inline-size: 400px;
+        inline-size: 400px;
     }
 
     textarea {
-        min-inline-size: 450px;
+        inline-size: 450px;
     }
 
     /*
@@ -900,6 +1010,18 @@ main#about > p {
         margin-inline: auto;
     }
 
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######            Dashboard             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#top-books > .retrieve-success {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }
 
 /* ≥ 1920px — Desktop (Full HD and up) */
@@ -975,5 +1097,24 @@ main#about > p {
     main#about > p {
         max-inline-size: 50%;
         margin-inline: auto;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######            Dashboard             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#book-read-activity > .chart-wrapper {
+        block-size: 400px;
+        padding-inline: 10%;
+    }
+
+    section#top-books > .retrieve-success {
+        grid-template-columns: repeat(5, 1fr);
+        padding-inline: 15%;
     }
 }

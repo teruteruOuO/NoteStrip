@@ -2,18 +2,18 @@
 <section id="book-read-activity" class="component">
     <section class="buttons">
         <button type="button" @click="changeDays(7)" id="7-days">
-            Last 7 Days
+            Last 7
         </button>
         <button type="button" @click="changeDays(15)" id="15-days">
-            Last 15 Days
+            Last 15
         </button>
         <button type="button" @click="changeDays(30)" id="30-days">
-            Last 30 Days
+            Last 30
         </button>
     </section>
 
     <section class="chart-wrapper" :key="bookReadActivity.chart_key">
-        <Line :data="chartData" :options="chartOptions" :height="360" />
+        <Line :data="chartData" :options="chartOptions"/>
     </section>
 </section>
 </template>
@@ -107,7 +107,7 @@ ChartJS.register(
     Tooltip,
     Legend
 )
-ChartJS.defaults.font.family = "'Courier New', 'Segoe UI', system-ui, -apple-system, sans-serif";
+ChartJS.defaults.font.family = "'Poppins', 'Courier New', 'Segoe UI', system-ui, -apple-system, sans-serif";
 ChartJS.defaults.font.size = 11;
 
  const chartData = computed(() => ({
@@ -116,7 +116,12 @@ ChartJS.defaults.font.size = 11;
         { 
             label: 'Daily Read Count', 
             backgroundColor: '#f87979', 
-            data: [...bookReadActivity.data] 
+            data: [...bookReadActivity.data],
+            borderColor: 'white',   // <-- line color
+            borderWidth: 1,         // <-- line thickness
+            pointBackgroundColor: '#f8545c', // <-- point fill
+            pointBorderColor: '#f8545c',     // <-- point outline
+            tension: 0.1 // optional: smooth curve instead of sharp angles 
         }
     ]
 }));
@@ -127,13 +132,14 @@ const chartOptions = computed(() => ({
     animation: true,
     plugins: {
     title: {
-        display: true,
-        text: `Daily Read Count (Last ${bookReadActivity.last_nth_day} Days)`,
-        align: 'center',
-        font: { size: 16, weight: '600' }
+            display: true,
+            text: `Daily Read Count (Last ${bookReadActivity.last_nth_day} Days)`,
+            align: 'center',
+            font: { size: 24, weight: '600' },
+            color: '#B8F4BC'
         },
         legend: { 
-            labels: { font: { size: 12 } } 
+            labels: { font: { size: 12 }, color: 'white' } 
         },
         tooltip: { 
             titleFont: { size: 12 }, 
@@ -143,10 +149,26 @@ const chartOptions = computed(() => ({
     scales: {
         y: {
             ticks: {
+                color: 'white',
                 stepSize: 1,
                 callback(value) { return Number.isInteger(value) ? value : ''; }
             },
-            title: { display: true, text: 'Number of Reads' }
+            title: { 
+                display: true, 
+                text: 'Number of Reads', 
+                color: 'white' 
+            },
+            grid: {
+                color: 'rgba(255,255,255,0.2)'
+            }
+        },
+        x: {
+            ticks: {
+                color: 'white' // <-- x-axis tick color
+            },
+            grid: {
+                color: 'rgba(255,255,255,0.2)'
+            }
         }
     }
 }));
