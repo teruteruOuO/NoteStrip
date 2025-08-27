@@ -12,14 +12,24 @@
     </section>
 
     <section class="retrieve-success" v-else>
-        <section v-for="book in booksData.books" :key="book.id" :id="`${book.title}-${book.id}`">
-            <p><RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">{{ book.title }}</RouterLink></p>
-            <p><img :src="book.image_source" :alt="book.title" style="max-width: 200px; max-height: 200px;"></p>
+        <section class="books">
+            <section v-for="book in booksData.books" :key="book.id" :id="`${book.title}-${book.id}`">
+                <p>
+                    <RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">
+                        {{ book.title }}
+                    </RouterLink>
+                </p>
+
+                <RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">
+                    <img :src="book.image_source" :alt="book.title" :title="book.title" />
+                </RouterLink>
+            </section>
         </section>
 
+        
         <section class="pagination buttons" v-if="booksData.total_pages > 1">
             <button type="button" @click="prevPage" :disabled="booksData.current_page <= 1">Previous</button>
-            <span>Page {{ booksData.current_page }} of {{ booksData.total_pages }}</span>
+            <p>Page {{ booksData.current_page }} of {{ booksData.total_pages }}</p>
             <button type="button" @click="nextPage" :disabled="booksData.current_page >= booksData.total_pages">Next</button>
         </section>
     </section>

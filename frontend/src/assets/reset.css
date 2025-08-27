@@ -34,8 +34,31 @@ li {
 img, picture, video {
     display: block;
     max-inline-size: 100%;
+    border-radius: 10px;
 }
 
 label, button {
     cursor: pointer;
 }
+
+/* Load Animation */
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #B8F4BC;
+    border-bottom-color: #2A3652;
+    border-radius: 50%;
+    display: block;
+    box-sizing: border-box;
+    margin: 0 auto;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+} 

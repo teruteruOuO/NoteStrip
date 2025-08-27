@@ -25,11 +25,6 @@
                     </textarea>
                 </li>
                 <li>
-                    <label for="extra-information">Extra Information: </label>
-                    <textarea name="extra-information" id="extra-information" v-model="bookInformation.extra_information" placeholder="optional">
-                    </textarea>
-                </li>
-                <li>
                     <label for="release-date">Release Date: </label>
                     <input type="date" name="release-date" id="release-date" v-model="bookInformation.release_date" placeholder="optional" />
                 </li>
@@ -106,7 +101,6 @@ const bookInformation = reactive({
         previewUrl: null
     },
     plot_description: null,
-    extra_information: null,
     release_date: null,
     end_date: null
 });
@@ -157,7 +151,6 @@ const retrieveABook = async () => {
         bookInformation.id = bookResponse.data.book.id;
         bookInformation.title = bookResponse.data.book.title;
         bookInformation.plot_description = bookResponse.data.book.plot_description;
-        bookInformation.extra_information = bookResponse.data.book.extra_information;
         bookInformation.release_date = bookResponse.data.book.release_date;
         bookInformation.end_date = bookResponse.data.book.end_date;
 
@@ -252,7 +245,6 @@ const updateBook = async () => {
         const body = {
             title: bookInformation.title,
             plot_description: bodyContent(bookInformation.plot_description),
-            extra_information: bodyContent(bookInformation.extra_information),
             release_date: bookInformation.release_date == '' ? null : bookInformation.release_date,
             end_date: bookInformation.end_date == '' ? null : bookInformation.end_date,
             image: newImageLocation ? newImageLocation : bookInformation.img.db     // If there's a new image, send that one instead of the current one

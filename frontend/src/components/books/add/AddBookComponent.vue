@@ -12,11 +12,6 @@
                 </textarea>
             </li>
             <li>
-                <label for="extra-information">Extra Information: </label>
-                <textarea name="extra-information" id="extra-information" v-model="bookInstance.extra_information" placeholder="optional">
-                </textarea>
-            </li>
-            <li>
                 <label for="release-date">Release Date: </label>
                 <input type="date" name="release-date" id="release-date" v-model="bookInstance.release_date" placeholder="optional" />
             </li>
@@ -40,7 +35,6 @@
     <section class="output">
         <p>{{ bookInstance.title }}</p>
         <p>{{ bookInstance.plot_description }}</p>
-        <p>{{ bookInstance.extra_information }}</p>
         <p>{{ bookInstance.release_date }}</p>
         <p>{{ bookInstance.end_date }}</p>
 
@@ -71,7 +65,6 @@ const bookInstance = reactive({
     title: '',
     image: { file: null, preview: null },
     plot_description: '',
-    extra_information: '',
     release_date: '',
     end_date: ''
 });
@@ -116,7 +109,6 @@ const addBook = async () => {
             title: bookInstance.title,
             image: uploadUrlResponse.data.image_location,
             plot_description: bookInstance.plot_description.trim() == '' ? null : bookInstance.plot_description,
-            extra_information: bookInstance.extra_information.trim() == '' ? null : bookInstance.extra_information,
             release_date: bookInstance.release_date == '' ? null : bookInstance.release_date,
             end_date: bookInstance.end_date == '' ? null : bookInstance.end_date,
         }

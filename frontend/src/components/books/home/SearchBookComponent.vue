@@ -1,6 +1,6 @@
 <template>
 <section id="search-book" class="component">
-    <form @submit.prevent="">
+    <form>
         <ul>
             <li>
                 <label for="search">Search Title: </label>
@@ -24,7 +24,11 @@
         <section class="retrieve-success" v-else>
             <section v-for="book in booksData.books" :key="book.id" :id="`search-${book.title}-${book.id}`">
                 <p><RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">{{ book.title }}</RouterLink></p>
-                <p><img :src="book.image_source" :alt="book.title" style="max-width: 200px; max-height: 200px;"></p>
+                <p>
+                    <RouterLink :to="{ name: 'view-book', params: { book_id: book.id }, query: { name: book.title } }">
+                        <img :src="book.image_source" :alt="book.title">
+                    </RouterLink>
+                </p>
             </section>
         </section>
     </section>

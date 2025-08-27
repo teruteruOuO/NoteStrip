@@ -1,6 +1,5 @@
 <template>
 <main id="books" class="view">
-    <h1>Books View</h1>
     <SearchBookComponent />
     <AddBooksLinkComponent />
     <RetrieveBooksComponent />

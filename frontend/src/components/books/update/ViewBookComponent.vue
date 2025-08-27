@@ -15,7 +15,6 @@
         <p>ID: {{ bookInformation.id }}</p>
         <p>Title: {{ bookInformation.title }}</p>
         <p>Plot Description: {{ bookInformation.plot_description ? bookInformation.plot_description : 'N/A' }}</p>
-        <p>Extra Information: {{ bookInformation.extra_information ? bookInformation.extra_information : 'N/A' }}</p>
         <p>Release Date: {{ bookInformation.release_date ? bookInformation.release_date : 'N/A' }}</p>
         <p>End Date: {{ bookInformation.end_date ? bookInformation.end_date : 'N/A' }}</p>
         <p>Reread: {{ bookInformation.reread }}</p>
@@ -80,7 +79,6 @@ const bookInformation = reactive({
     title: null,
     img: null,
     plot_description: null,
-    extra_information: null,
     release_date: null,
     end_date: null,
     reread: null,
@@ -109,7 +107,6 @@ const retrieveABook = async (book_id) => {
         bookInformation.title = bookResponse.data.book.title;
         bookInformation.img = bookResponse.data.book.img;
         bookInformation.plot_description = bookResponse.data.book.plot_description;
-        bookInformation.extra_information = bookResponse.data.book.extra_information;
         bookInformation.release_date = bookResponse.data.book.release_date;
         bookInformation.end_date = bookResponse.data.book.end_date;
         bookInformation.reread = bookResponse.data.book.reread;
@@ -187,7 +184,6 @@ const rereadBook = async () => {
         bookInformation.id = null;
         bookInformation.title = null;
         bookInformation.plot_description = null;
-        bookInformation.extra_information = null;
         bookInformation.release_date = null;
         bookInformation.end_date = null;
         bookInformation.reread = null;
@@ -245,7 +241,6 @@ const unRereadBook = async () => {
         bookInformation.id = null;
         bookInformation.title = null;
         bookInformation.plot_description = null;
-        bookInformation.extra_information = null;
         bookInformation.release_date = null;
         bookInformation.end_date = null;
         bookInformation.reread = null;
@@ -290,7 +285,6 @@ watch(() => props.bookId, async (id) => {
     bookInformation.title = null
     bookInformation.img = null
     bookInformation.plot_description = null
-    bookInformation.extra_information = null
     bookInformation.release_date = null
     bookInformation.end_date = null
     bookInformation.reread = null

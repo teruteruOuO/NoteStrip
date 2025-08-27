@@ -22,6 +22,7 @@
             <li v-if="user.user.id && route.path.includes('account')"><RouterLink :to="{ name: 'account-email' }">Email</RouterLink></li>
             <li v-if="user.user.id && route.path.includes('account')"><RouterLink :to="{ name: 'account-password' }">Password</RouterLink></li>
             <li v-if="user.user.id && route.path.includes('account')"><RouterLink :to="{ name: 'account-logs' }">Logs</RouterLink></li>
+            <li v-if="user.user.id && route.path.includes('account')"><a @click="logoutUser" id="logout">Logout</a></li>
         </ul>
     </nav>
     
@@ -34,9 +35,11 @@
 
 
 <script setup>
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
+import axios from 'axios';
+
 
 const user = useUserStore();
 const route = useRoute();
@@ -56,6 +59,42 @@ const isMenuOpen = ref(false); // Menu visibility source of truth
 watch(isDesktop, (desktop) => {
     isMenuOpen.value = desktop ? true : false;
 }, { immediate: true });
+
+
+// Logout
+const router = useRouter();
+const feedback = reactive({ message: '', success: false });
+const isLoading = reactive({ button: false });
+const logoutUser = async () => {
+    isLoading.button = true;
+
+    try {
+        const response = await axios.post('/api/authentication/logout');
+        console.log(response.data.message);
+        console.log(`Response data information:`, response);
+
+        user.user.id = null;    // clear id
+        router.push({ name: 'home' });  // Reroute to the home page
+
+    } catch (error) {
+        console.error(`An error occured while logging out user`);
+        feedback.success = false;
+
+        // Handle errors returned from the backend
+        if (error.response) {
+            console.error("Backend error:", error.response);
+            feedback.message = error.response.data.message;
+
+        // Handle unexpected errors
+        } else {
+            console.error("Unexpected error:", error.message);
+            feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
+        }
+
+    } finally {
+        isLoading.button = false;
+    }
+}
 </script>
 
 <!-- Animation for showing and disappearing the navigation lists in phone vertical -->
@@ -83,5 +122,11 @@ watch(isDesktop, (desktop) => {
         opacity: 1;
         transition: none;
     }
+}
+
+/* Logout "Link" */
+#logout {
+    text-decoration: underline;
+    cursor: pointer;
 }
 </style>

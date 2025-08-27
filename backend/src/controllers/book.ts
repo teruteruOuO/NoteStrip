@@ -51,8 +51,8 @@ export const addBook = async (req: Request, res: Response, next: NextFunction) =
         let error: AppError;
         let bookId: number;
         const userInformation = req.user as IDecodedTokenPayload;
-        const { title, image, plot_description, extra_information, release_date, end_date } = req.body as 
-        { title: string, image: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null };
+        const { title, image, plot_description, release_date, end_date } = req.body as 
+        { title: string, image: string, plot_description: string | null, release_date: string | null, end_date: string | null };
 
         console.log('Processing addBook...');
 
@@ -70,8 +70,8 @@ export const addBook = async (req: Request, res: Response, next: NextFunction) =
         console.log(`Storing ${userInformation.email}'s book (${title}) to the database...`);
         transactionQuery = [
             {
-                query: 'INSERT INTO BOOK (ACCT_ID, BOOK_TITLE, BOOK_IMG, BOOK_PLOT_DESC, BOOK_EXTRA_INFO, BOOK_DATE_RELEASE, BOOK_DATE_END) VALUES (?, ?, ?, ?, ?, ?, ?);',
-                params: [userInformation.id, title, image, plot_description, extra_information, release_date, end_date]
+                query: 'INSERT INTO BOOK (ACCT_ID, BOOK_TITLE, BOOK_IMG, BOOK_PLOT_DESC, BOOK_DATE_RELEASE, BOOK_DATE_END) VALUES (?, ?, ?, ?, ?, ?);',
+                params: [userInformation.id, title, image, plot_description, release_date, end_date]
             },
             {
                 query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
@@ -104,7 +104,7 @@ export const retrieveAllBooks = async (req: Request, res: Response, next: NextFu
         let error: AppError;
         let totalBooks: number;
         const userInformation = req.user as IDecodedTokenPayload;
-        const booksPerPage = 5;                                     // page size
+        const booksPerPage = 20;                                     // page size
         const page = parseInt(req.query.page as string) || 1;       /* ?page=... (defaults to 1) */
         const offset = (page - 1) * booksPerPage;                    // how many rows to skip
 
@@ -210,7 +210,7 @@ export const searchBook = async (req: Request, res: Response, next: NextFunction
 export const viewABook = async (req: Request, res: Response, next: NextFunction) => {
     try {
         type LatestReadActivity = { id: number, latest_read: string }
-        type BookInformation = { id: number, title: string, img: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null, reread: 'yes' | 'no' | null , date_added: string };
+        type BookInformation = { id: number, title: string, img: string, plot_description: string | null, release_date: string | null, end_date: string | null, reread: 'yes' | 'no' | null , date_added: string };
         let selectQuery: string;
         let resultQuery: any[];
         let error: AppError;
@@ -239,8 +239,7 @@ export const viewABook = async (req: Request, res: Response, next: NextFunction)
                         BOOK_ID, 
                         BOOK_TITLE, 
                         BOOK_IMG, 
-                        BOOK_PLOT_DESC, 
-                        BOOK_EXTRA_INFO, 
+                        BOOK_PLOT_DESC,
                         DATE_FORMAT(BOOK_DATE_RELEASE, '%M %e, %Y') AS BOOK_DATE_RELEASE,
                         DATE_FORMAT(BOOK_DATE_END, '%M %e, %Y')      AS BOOK_DATE_END,
                         DATE_FORMAT(BOOK_TIMESTAMP, '%M %e, %Y %l:%i %p') AS BOOK_TIMESTAMP
@@ -258,7 +257,6 @@ export const viewABook = async (req: Request, res: Response, next: NextFunction)
             title: resultQuery[0].BOOK_TITLE,
             img: await PersonalS3Bucket.RetrieveImageUrl(resultQuery[0].BOOK_IMG),
             plot_description: resultQuery[0].BOOK_PLOT_DESC,
-            extra_information: resultQuery[0].BOOK_EXTRA_INFO,
             release_date: resultQuery[0].BOOK_DATE_RELEASE,
             end_date: resultQuery[0].BOOK_DATE_END,
             reread: null,
@@ -634,7 +632,7 @@ export const deleteNote = async (req: Request, res: Response, next: NextFunction
 // Update a Book (Step 1 of 3: Retrieve the book's contents)
 export const retrieveBookForUpdate = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        type BookInformation = { id: number, title: string, img: { s3: string, db: string }, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null };
+        type BookInformation = { id: number, title: string, img: { s3: string, db: string }, plot_description: string | null, release_date: string | null, end_date: string | null };
         let selectQuery: string;
         let resultQuery: any[];
         let error: AppError;
@@ -661,8 +659,7 @@ export const retrieveBookForUpdate = async (req: Request, res: Response, next: N
                         BOOK_ID, 
                         BOOK_TITLE, 
                         BOOK_IMG, 
-                        BOOK_PLOT_DESC, 
-                        BOOK_EXTRA_INFO,
+                        BOOK_PLOT_DESC,
                         DATE_FORMAT(BOOK_DATE_RELEASE, '%Y-%m-%d') AS BOOK_DATE_RELEASE,
                         DATE_FORMAT(BOOK_DATE_END, '%Y-%m-%d') AS BOOK_DATE_END
                     FROM BOOK WHERE ACCT_ID = ? AND BOOK_ID = ?;`;
@@ -681,7 +678,6 @@ export const retrieveBookForUpdate = async (req: Request, res: Response, next: N
                 db: resultQuery[0].BOOK_IMG
             },
             plot_description: resultQuery[0].BOOK_PLOT_DESC,
-            extra_information: resultQuery[0].BOOK_EXTRA_INFO,
             release_date: resultQuery[0].BOOK_DATE_RELEASE,
             end_date: resultQuery[0].BOOK_DATE_END
         }
@@ -748,13 +744,13 @@ export const replaceSignedS3UploadURL = async (req: Request, res: Response, next
 // Update a Book (Step 3 of 3: Update the book's information in the database)
 export const updateBook = async (req: Request, res: Response, next: NextFunction) => {
    try {
-        type BookInformation = { title: string, image: string, plot_description: string | null, extra_information: string | null, release_date: string | null, end_date: string | null };
+        type BookInformation = { title: string, image: string, plot_description: string | null, release_date: string | null, end_date: string | null };
         let transactionQuery: ITransactionQuery[];
         let resultQuery: any[];
         let error: AppError;
         const book_id = Number(req.params.book_id);
         const userInformation = req.user as IDecodedTokenPayload;
-        const { title, image, plot_description, extra_information, release_date, end_date } = req.body as BookInformation;
+        const { title, image, plot_description, release_date, end_date } = req.body as BookInformation;
         
         console.log('Processing updateBook...');
 
@@ -772,8 +768,8 @@ export const updateBook = async (req: Request, res: Response, next: NextFunction
         console.log(`Updating ${userInformation.email}'s book (${title}) to the database...`);
         transactionQuery = [
             {
-                query: 'UPDATE BOOK SET BOOK_TITLE = ?, BOOK_IMG = ?, BOOK_PLOT_DESC = ?, BOOK_EXTRA_INFO = ?, BOOK_DATE_RELEASE = ?, BOOK_DATE_END = ? WHERE ACCT_ID = ? AND BOOK_ID = ?;',
-                params: [title, image, plot_description, extra_information, release_date, end_date, userInformation.id, book_id]
+                query: 'UPDATE BOOK SET BOOK_TITLE = ?, BOOK_IMG = ?, BOOK_PLOT_DESC = ?, BOOK_DATE_RELEASE = ?, BOOK_DATE_END = ? WHERE ACCT_ID = ? AND BOOK_ID = ?;',
+                params: [title, image, plot_description, release_date, end_date, userInformation.id, book_id]
             },
             {
                 query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
