@@ -29,7 +29,7 @@
         
         <section class="pagination buttons" v-if="booksData.total_pages > 1">
             <button type="button" @click="prevPage" :disabled="booksData.current_page <= 1">Previous</button>
-            <p>Page {{ booksData.current_page }} of {{ booksData.total_pages }}</p>
+            <p>{{ booksData.current_page }}/{{ booksData.total_pages }}</p>
             <button type="button" @click="nextPage" :disabled="booksData.current_page >= booksData.total_pages">Next</button>
         </section>
     </section>

@@ -1,6 +1,6 @@
 <template>
 <section id="search-book" class="component">
-    <form>
+    <form @submit.prevent="">
         <ul>
             <li>
                 <label for="search">Search Title: </label>

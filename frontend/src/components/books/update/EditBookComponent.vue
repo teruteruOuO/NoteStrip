@@ -1,5 +1,5 @@
 <template>
-<section id="edit-a-book" class="component">
+<section id="add-book-for-user" class="component">
     <section class="loader" v-if="isLoading.page">
     </section>
 
@@ -9,67 +9,74 @@
 
     <section class="retrieve-success" v-else>
         <section class="buttons">
-            <button type="button" @click="goBack">Go Back</button>
+            <button type="button" @click="goBack">⇐ Go Back</button>
         </section>
 
-        <!-- This is the form -->
+        <!-- This is the form (Will inherit some of AddBookComponent's classes for the style) -->
          <form @submit.prevent="updateBook">
             <ul>
-                <li>
-                    <label for="title">Book Title: </label>
-                    <input type="text" name="title" id="title" v-model="bookInformation.title" placeholder="required" required />
-                </li>
-                <li>
-                    <label for="plot-description">Plot Description: </label>
-                    <textarea name="plot-description" id="plot-description" v-model="bookInformation.plot_description" placeholder="optional">
-                    </textarea>
-                </li>
-                <li>
-                    <label for="release-date">Release Date: </label>
-                    <input type="date" name="release-date" id="release-date" v-model="bookInformation.release_date" placeholder="optional" />
-                </li>
-                <li>
-                    <label for="end-date">End Date: </label>
-                    <input type="date" name="end-date" id="end-date" v-model="bookInformation.end_date" placeholder="optional" />
-                </li>
-                <li>
-                    <label for="image">Book Image: </label>
-                    <input type="file" name="image" id="image" accept="image/*" @change="handleImageChange" />
-                    <!-- Preview image if available -->
-                    <div v-if="bookInformation.img.previewUrl || bookInformation.img.s3">
-                        <p>Image Preview:</p>
-                        <img
-                            :src="bookInformation.img.previewUrl || bookInformation.img.s3"
-                            :alt="bookInformation.title"
-                            style="max-width: 200px; max-height: 200px;"
-                        />
-                    </div>
-                </li>
-                <li>
-                    <button type="submit" :disabled="isLoading.update" :class="{ 'button-loading': isLoading.update }">
-                        <span v-if="!isLoading.update">Update Book</span>
-                        <span v-else>Updating book..</span>
-                    </button>
+                <section class="image-preview">
+                    <h2>Image Preview</h2>
 
-                    <button type="button" @click="resetImage">
-                        <span>Reset Image to Original</span>
-                    </button>
+                    <img :src="bookInformation.img.previewUrl || bookInformation.img.s3" />
 
-                    <button type="button" @click="deleteBook" :disabled="isLoading.delete" :class="{ 'button-loading': isLoading.delete }">
-                        <span v-if="!isLoading.delete">Delete Book</span>
-                        <span v-else>Deleting book..</span>
-                    </button>
-                </li>
+                    <li class="image-input">
+                        <label for="image" class="custom-file-upload">Change Image</label>
+                        <input type="file" name="image" id="image" accept="image/*" @change="handleImageChange" />
+                    </li>
+
+                    <li>
+                        <button type="button" @click="resetImage">
+                            <span>Reset Image</span>
+                        </button>
+                    </li>
+
+                    <li>
+                        <button type="submit" :disabled="isLoading.update" :class="{ 'button-loading': isLoading.update }">
+                            <span v-if="!isLoading.update">Update Book</span>
+                            <span v-else>Updating book..</span>
+                        </button>
+                    </li>
+
+                    <li>
+                        <button type="button" @click="deleteBook" :disabled="isLoading.delete" :class="{ 'button-loading': isLoading.delete }">
+                            <span v-if="!isLoading.delete">Delete Book</span>
+                            <span v-else>Deleting book..</span>
+                        </button>
+                    </li>
+                    
+                </section>
+
+                <section class="information">
+                    <li>
+                        <label for="title">Book Title: </label>
+                        <input type="text" name="title" id="title" v-model="bookInformation.title" placeholder="required" required />
+                    </li>
+                    <li>
+                        <label for="plot-description">Plot Description: </label>
+                        <textarea name="plot-description" id="plot-description" v-model="bookInformation.plot_description" placeholder="optional">
+                        </textarea>
+                    </li>
+                    <li>
+                        <label for="release-date">Release Date: </label>
+                        <input type="date" name="release-date" id="release-date" v-model="bookInformation.release_date" placeholder="optional" />
+                    </li>
+                    <li>
+                        <label for="end-date">End Date: </label>
+                        <input type="date" name="end-date" id="end-date" v-model="bookInformation.end_date" placeholder="optional" />
+                    </li>
+                    
+                </section>
             </ul>
         </form>
 
         <!-- Feedback message from update -->
-        <section class="feedback fail" v-if="feedback.update.message && !feedback.update.success">
+        <section ref="feedbackScroll" class="feedback fail" v-if="feedback.update.message && !feedback.update.success">
             <p>{{ feedback.update.message }}</p>
         </section>
 
         <!-- Feedback message from delete -->
-        <section class="feedback fail" v-if="feedback.delete.message && !feedback.delete.success">
+        <section ref="feedbackScroll" class="feedback fail" v-if="feedback.delete.message && !feedback.delete.success">
             <p>{{ feedback.delete.message }}</p>
         </section>
     </section>
@@ -78,7 +85,7 @@
 
 <script setup>
 import { useUserStore } from '@/stores/user';
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, ref, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 
@@ -90,6 +97,7 @@ const feedback = reactive({
     update: { message: '', success: false }, 
     delete: { message: '', success: false }, 
 });
+const feedbackScroll = ref(null);
 const isLoading = reactive({ page: false, update: false, delete: false });
 const bookInformation = reactive({
     id: null,
@@ -276,6 +284,9 @@ const updateBook = async () => {
             feedback.update.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
 
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+
     } finally {
         isLoading.update = false;
     }
@@ -327,6 +338,9 @@ const deleteBook = async () => {
             console.error("Unexpected error:", error.message);
             feedback.delete.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.delete = false;

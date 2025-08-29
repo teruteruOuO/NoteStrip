@@ -20,6 +20,20 @@ export const errorHandler = (err: AppError, req: Request, res: Response, next: N
             res.status(409).json({ message: 'Email is already taken.' });
             return;
         }
+
+        // Note Title too long
+        if (err.code && err.code.includes('ER_DATA_TOO_LONG') && err.sqlMessage.includes('NOTE_TITLE')) {
+            console.error(`User's note title is too long`);
+            res.status(400).json({ message: 'Note title too long (250 Max Characters)' });
+            return;
+        }
+
+        // Book Title too long
+        if (err.code && err.code.includes('ER_DATA_TOO_LONG') && err.sqlMessage.includes('BOOK_TITLE')) {
+            console.error(`User's note title is too long`);
+            res.status(400).json({ message: 'Book title too long (300 Max Characters)' });
+            return;
+        }
     }
 
     res.status(err.status || 500).json({ message: err.frontend_message || 'Internal Server Error' });

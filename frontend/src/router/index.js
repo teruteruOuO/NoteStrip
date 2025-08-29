@@ -107,7 +107,7 @@ router.beforeEach(async (to, from, next) => {
     if (isValid) {
 		next();
 	} else {
-		next({ name: 'home'});
+		next({ name: 'login'});
 	}
     
 });

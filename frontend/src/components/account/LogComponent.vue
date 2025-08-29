@@ -26,7 +26,7 @@
 
         <section class="pagination" v-if="logData.total_pages > 1">
             <button type="button" @click="prevPage" :disabled="logData.current_page <= 1">Previous</button>
-            <p>Page {{ logData.current_page }} of {{ logData.total_pages }}</p>
+            <p>{{ logData.current_page }}/{{ logData.total_pages }}</p>
             <button type="button" @click="nextPage" :disabled="logData.current_page >= logData.total_pages">Next</button>
         </section>
     </section>

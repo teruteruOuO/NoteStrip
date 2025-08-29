@@ -1,6 +1,5 @@
 <template>
 <section id="view-a-book" class="component">
-    <h2>Check Book ({{ props.name }} {{ props.bookId }})</h2>
     <section class="loader" v-if="isLoading.page">
     </section>
 
@@ -9,48 +8,63 @@
     </section>
 
     <section class="retrieve-success" v-else>
+        <h1>{{ bookInformation.title }}</h1>
         <section class="link">
-            <RouterLink :to="{ name: 'edit-book', params: { book_id: bookInformation.id } }">Edit {{ bookInformation.title }}'s details</RouterLink>
-        </section>
-        <p>ID: {{ bookInformation.id }}</p>
-        <p>Title: {{ bookInformation.title }}</p>
-        <p>Plot Description: {{ bookInformation.plot_description ? bookInformation.plot_description : 'N/A' }}</p>
-        <p>Release Date: {{ bookInformation.release_date ? bookInformation.release_date : 'N/A' }}</p>
-        <p>End Date: {{ bookInformation.end_date ? bookInformation.end_date : 'N/A' }}</p>
-        <p>Reread: {{ bookInformation.reread }}</p>
-        <p>Date Recorded {{ bookInformation.date_added }}</p>
-        <p v-if="bookInformation.read_amount !== null">Read amount: {{ bookInformation.read_amount }}</p>
-        <p><img :src="bookInformation.img" :alt="bookInformation.title" style="max-width: 200px; max-height: 200px;"></p>
-
-        <section id="reread-activity" v-if="readActivity.id">
-            <p>Latest Read Activity within the last 10 hrs: {{ readActivity.latest_read }}</p>
+            <RouterLink :to="{ name: 'edit-book', params: { book_id: bookInformation.id } }">
+                Edit Book
+            </RouterLink>
         </section>
 
-        <section class="buttons">
-            <ul>
-                <li v-if="!readActivity.id">
-                    <label for="re-read">Re-read today? </label>
-                    <!-- Reread button. Disabled if readActivity is valid or if loading -->
-                    <button type="button" id="re-read" @click="rereadBook" :disabled="readActivity.id || isLoading.button" :class="{ 'button-loading': isLoading.button }">
-                        <span v-if="readActivity.id">Already reread today</span>
-                        <span v-else-if="isLoading.button">Recording read activity...</span>
-                        <span v-else>Yes</span>
-                    </button>
-                </li>
-                <li v-if="readActivity.id">
-                    <label for="un-reread">Made a mistake? Unre-read for today </label>
-                    <!-- Unreread button. Active only if there's a readActivity -->
-                    <button type="button" id="un-reread" @click="unRereadBook" :disabled="!readActivity.id || isLoading.button" :class="{ 'button-loading': isLoading.button }">
-                        <span v-if="isLoading.button">Reverting read activity...</span>
-                        <span v-else>Revert reread</span>
-                    </button>
-                </li>
-            </ul>
+        <section class="book-instance-information">
+            <section class="records" :class="{ 'has-plot': bookInformation.plot_description }">
+                <section class="image-record">
+                    <img :src="bookInformation.img" :alt="bookInformation.title" />
+                </section>
 
-            <section class="feedback" :class="{ 'success': feedback.button.success, 'fail': !feedback.button.success }" v-if="feedback.button.message !== ''">
-                <p>{{ feedback.button.message }}</p>
+                <section class="text-record">
+                    <p v-if="readActivity.id">
+                    <span class="attribute">Latest Read Activity: </span>
+                    {{ readActivity.latest_read }}
+                    </p>
+                    <p>
+                        <span class="attribute">Release Date: </span>{{ bookInformation.release_date ? bookInformation.release_date : 'N/A' }}
+                    </p>
+                    <p>
+                        <span class="attribute">End Date: </span>{{ bookInformation.end_date ? bookInformation.end_date : 'N/A' }}
+                    </p>
+                    <p>
+                        <span class="attribute">Date Added: </span>{{ bookInformation.date_added }}
+                    </p>
+                    <p v-if="bookInformation.read_amount !== null">
+                        <span class="attribute">Read Amount: </span>{{ bookInformation.read_amount }}
+                    </p>
+
+                    <section class="buttons">
+                        <!-- Reread button. Disabled if readActivity is valid or if loading -->
+                        <button v-if="!readActivity.id" type="button" id="re-read" @click="rereadBook" :disabled="readActivity.id || isLoading.button" :class="{ 'button-loading': isLoading.button }">
+                            <span v-if="readActivity.id">Already reread today</span>
+                            <span v-else-if="isLoading.button">Rereading...</span>
+                            <span v-else>Read Recently?</span>
+                        </button>
+
+                        <!-- Unreread button. Active only if there's a readActivity -->
+                        <button v-if="readActivity.id" type="button" id="un-reread" @click="unRereadBook" :disabled="!readActivity.id || isLoading.button" :class="{ 'button-loading': isLoading.button }">
+                            <span v-if="isLoading.button">Reverting...</span>
+                            <span v-else>Revert Read Action</span>
+                        </button>
+                    </section>  
+                </section>
+            </section>
+            
+            <section class="plot-description" v-if="bookInformation.plot_description">
+                <p><span class="attribute">Plot Description:</span></p>
+                <p>
+                    {{ bookInformation.plot_description ? bookInformation.plot_description : 'N/A' }}
+                </p>
             </section>
         </section>
+        
+        
     </section>
 </section> 
 </template>
@@ -170,11 +184,7 @@ const rereadBook = async () => {
         feedback.button.success = true;
         feedback.button.message = response.data.message;
 
-        // Remove the feedback message after 5 seconds
-        setTimeout(() => {
-            feedback.button.success = false;
-            feedback.button.message = '';
-        }, 5000);
+        alert(feedback.button.message);
 
         /* AJAX call operation instead of refresh */
         // Reset all variables except for rereadBook variables and the image
@@ -227,11 +237,7 @@ const unRereadBook = async () => {
         feedback.button.success = true;
         feedback.button.message = response.data.message;
 
-        // Remove the feedback message after 5 seconds
-        setTimeout(() => {
-            feedback.button.success = false;
-            feedback.button.message = '';
-        }, 5000);
+        alert(feedback.button.message);
 
         /* AJAX call operation instead of refresh */
         // Reset all variables except for rereadBook variables

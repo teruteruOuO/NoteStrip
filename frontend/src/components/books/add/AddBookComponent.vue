@@ -2,50 +2,48 @@
 <section id="add-book-for-user" class="component">
     <form @submit.prevent="addBook">
         <ul>
-            <li>
-                <label for="title">Book Title: </label>
-                <input type="text" name="title" id="title" v-model="bookInstance.title" placeholder="required" required />
-            </li>
-            <li>
-                <label for="plot-description">Plot Description: </label>
-                <textarea name="plot-description" id="plot-description" v-model="bookInstance.plot_description" placeholder="optional">
-                </textarea>
-            </li>
-            <li>
-                <label for="release-date">Release Date: </label>
-                <input type="date" name="release-date" id="release-date" v-model="bookInstance.release_date" placeholder="optional" />
-            </li>
-            <li>
-                <label for="end-date">End Date: </label>
-                <input type="date" name="end-date" id="end-date" v-model="bookInstance.end_date" placeholder="optional" />
-            </li>
-            <li>
-                <label for="image">Book Image: </label>
-                <input type="file" name="image" id="image" accept="image/*" @change="handleImageChange" required />
-            </li>
-            <li>
-                <button type="submit" :disabled="isLoading.form" :class="{ 'button-loading': isLoading.form }">
-                    <span v-if="!isLoading.form">Add Book</span>
-                    <span v-else>Adding book..</span>
-                </button>
-            </li>
+            <section class="image-preview">
+                <h2>Image Preview</h2>
+
+                <img :src="bookInstance.image.preview" />
+
+                <li class="image-input">
+                    <label for="image" class="custom-file-upload">Change Image </label>
+                    <input type="file" name="image" id="image" accept="image/*" @change="handleImageChange" required />
+                </li>
+
+                <li>
+                    <button type="submit" :disabled="isLoading.form" :class="{ 'button-loading': isLoading.form }">
+                        <span v-if="!isLoading.form">Add Book</span>
+                        <span v-else>Adding book..</span>
+                    </button>
+                </li>
+            </section>
+
+            <section class="information">
+                <li>
+                    <label for="title">Book Title: </label>
+                    <input type="text" name="title" id="title" v-model="bookInstance.title" placeholder="Required" required />
+                </li>
+                <li>
+                    <label for="plot-description">Plot Description: </label>
+                    <textarea name="plot-description" id="plot-description" v-model="bookInstance.plot_description" placeholder="Optional">
+                    </textarea>
+                </li>
+                <li>
+                    <label for="release-date">Release Date: </label>
+                    <input type="date" name="release-date" id="release-date" v-model="bookInstance.release_date" placeholder="optional" />
+                </li>
+                <li>
+                    <label for="end-date">End Date: </label>
+                    <input type="date" name="end-date" id="end-date" v-model="bookInstance.end_date" placeholder="optional" />
+                </li>
+                
+            </section>
         </ul>
     </form>
 
-    <section class="output">
-        <p>{{ bookInstance.title }}</p>
-        <p>{{ bookInstance.plot_description }}</p>
-        <p>{{ bookInstance.release_date }}</p>
-        <p>{{ bookInstance.end_date }}</p>
-
-        <!-- Preview image if available -->
-        <div v-if="bookInstance.image.preview">
-            <p>Image Preview:</p>
-            <img :src="bookInstance.image.preview" alt="Book Preview" />
-        </div>
-    </section>
-
-    <section class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
+    <section ref="feedbackScroll" class="feedback" :class="{ 'success': feedback.success, 'fail': !feedback.success }" v-if="feedback.message">
         <p>{{ feedback.message }}</p>
     </section>
 </section>    
@@ -53,7 +51,7 @@
 
 <script setup>
 import { useUserStore } from '@/stores/user';
-import { reactive } from 'vue';
+import { reactive, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -61,6 +59,7 @@ const router = useRouter();
 const user = useUserStore();
 const isLoading = reactive({ form: false });
 const feedback = reactive({ message: '', success: false });
+const feedbackScroll = ref(null);
 const bookInstance = reactive({
     title: '',
     image: { file: null, preview: null },
@@ -95,16 +94,7 @@ const addBook = async () => {
         console.log(uploadUrlResponse.data.message);
         console.log(`Upload URL Response data information:`, uploadUrlResponse);
 
-        // Step 2: Upload file to the S3 bucket via signed URL
-        await axios.put(uploadUrlResponse.data.signed_url, imageFile, {
-            headers: { 
-                'Content-Type': uploadUrlBody.content_type 
-            },
-            withCredentials: false // disables cookies for S3 PUT
-        });
-        console.log(`Successfuly uploaded the image (${uploadUrlResponse.data.image_location}) to the S3 bucket!`);
-
-        // Step 3: Store the book's information to the database
+        // Step 2: Store the book's information to the database
         const body = {
             title: bookInstance.title,
             image: uploadUrlResponse.data.image_location,
@@ -115,6 +105,15 @@ const addBook = async () => {
         const storeDataResponse = await axios.post(`/api/book/add-book/${user.user.id}`, body);
         console.log(storeDataResponse.data.message);
         console.log(`Store Data Response data information:`, storeDataResponse);
+
+        // Step 3: Upload file to the S3 bucket via signed URL
+        await axios.put(uploadUrlResponse.data.signed_url, imageFile, {
+            headers: { 
+                'Content-Type': uploadUrlBody.content_type 
+            },
+            withCredentials: false // disables cookies for S3 PUT
+        });
+        console.log(`Successfuly uploaded the image (${uploadUrlResponse.data.image_location}) to the S3 bucket!`);
 
         alert(storeDataResponse.data.message);
         
@@ -138,6 +137,9 @@ const addBook = async () => {
             console.error("Unexpected error:", error.message);
             feedback.message = "An unexpected error happend with the component itself. Refresh the page or try contacting the admin.";
         }
+
+        await nextTick();
+        feedbackScroll.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } finally {
         isLoading.form = false;

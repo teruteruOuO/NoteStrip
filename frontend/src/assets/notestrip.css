@@ -36,6 +36,12 @@ h1, h2, h3, h4, h5, h6 {
     color: #B8F4BC;
 }
 
+/* Apply to all section img but exclude ones inside header and #homepage */
+section img:not(header img, #homepage img) {
+    border-color: #B8F4BC;
+    border-style: inset;
+}
+
 /* Links */
 a {
     color: white;
@@ -83,8 +89,8 @@ label.text-area {
 }
 
 textarea {
-    min-inline-size: 350px;
-    min-block-size: 400px;
+    inline-size: 350px;
+    block-size: 400px;
     border: 2px solid black;
     text-align: left;
     border-radius: 20px;
@@ -107,9 +113,10 @@ form button {
     border: 2px solid black;
 }
 
-.button-loading {
-    background-color: #d6f8d8;
-    color: rgb(46, 46, 46);
+.button-loading,
+.pagination > button:hover {
+    background-color: #d6f8d8 !important;
+    color: rgb(46, 46, 46) !important;
 }
 
 /* 1) Interactive states only when NOT disabled */
@@ -644,6 +651,342 @@ section#top-books > .retrieve-success img {
 ##############################################
 ##############################################
 ######                                  ######
+######      View Book Instance          ######
+######                                  ######
+##############################################
+##############################################
+*/
+
+section#view-a-book .retrieve-fail,
+section#view-a-book h1,
+section#view-a-book .link {
+    text-align: center;
+}
+
+section#view-a-book img {
+    inline-size: 175px;
+    block-size: 250px;
+    object-fit: cover;
+}
+
+section#view-a-book .attribute {
+    font-weight: bold;
+}
+
+section#view-a-book .book-instance-information * {
+    font-size: 0.85rem;
+}
+
+section#view-a-book .book-instance-information {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: center;
+    margin-block-start: 20px;
+}
+
+section#view-a-book .book-instance-information > section {
+    flex: 1;
+}
+
+section#view-a-book .book-instance-information > .records {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    justify-content: center;
+}
+
+/* Override what the attributes have if a book has a plot description */
+section#view-a-book .book-instance-information > .has-plot {
+    justify-content: end;
+}
+
+section#view-a-book .book-instance-information > .records > section {
+    display: flex;
+    flex-direction: column;
+}
+
+section#view-a-book .book-instance-information > .records > .text-record {
+    text-align: center;
+    gap: 10px;
+}
+
+section#view-a-book .book-instance-information > .records img,
+section#view-a-book .book-instance-information > .records .buttons {
+    align-self: center;
+}
+
+section#view-a-book button {
+    inline-size: 150px;
+    block-size: 30px;
+}
+
+section#view-a-book .book-instance-information > .plot-description p {
+    text-align: justify;
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+######           Book Notes             ######
+######                                  ######
+##############################################
+##############################################
+*/
+
+section#view-book-note {
+    /* background-color: #830209;
+    border: 1px solid black; */
+    margin-block-start: 20px;
+}
+
+section#view-book-note h2 {
+    text-align: center;
+}
+
+/* Add Note: Start */
+section#view-book-note .add-note-button button {
+    display: block;
+    inline-size: 200px;
+    block-size: 40px;
+    margin-inline: auto;
+}
+
+section#view-book-note #add-note {
+    margin-block-start: 10px;
+    text-align: center;
+}
+
+section#view-book-note #add-note form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+section#view-book-note #add-note input {
+    display: block;
+    inline-size: 350px;
+    block-size: 40px;
+    margin-inline: auto;
+}
+
+section#view-book-note #add-note textarea {
+    margin-inline: auto;
+}
+
+section#view-book-note #add-note button {
+    inline-size: 200px;
+    block-size: 30px;
+}
+/* Add Note: End */
+
+section#view-book-note .no-list {
+    text-align: center;
+}
+
+/* Note List: Start */
+section#view-book-note .note-lists {
+    margin-block-start: 20px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+section#view-book-note .note-lists .note-information {
+    padding: 10px;
+    border: 1px solid #B8F4BC;
+    border-radius: 5px;
+}
+
+section#view-book-note .note-lists > * {
+    margin-block-start: 20px;
+}
+
+section#view-book-note .buttons {
+    /* background-color: #021a83; */
+    /* Flex Parent */
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+}
+
+section#view-book-note .buttons p {
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+section#view-book-note .buttons button {
+    display: block;
+    border-radius: 0px;
+    inline-size: 100px;
+}
+/* Note List: End */
+
+/* Update Note: Start */
+section#view-book-note .update-note {
+    padding: 10px;
+    border: 1px solid #B8F4BC;
+    border-radius: 5px;
+}
+
+section#view-book-note .update-note form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+section#view-book-note .update-note input {
+    display: block;
+    inline-size: 100%;
+    block-size: 40px;
+}
+
+section#view-book-note .update-note textarea {
+    inline-size: 100%; 
+    block-size: unset;
+    min-block-size: 200px; 
+}
+
+section#view-book-note .update-note form li:last-of-type {
+    margin-inline-start: auto;
+    background-color: #f8545c;
+}
+
+section#view-book-note .update-note form button {
+    display: block;
+    border-radius: 0px;
+    inline-size: 100px; 
+}
+
+section#view-book-note .update-note .feedback {
+    text-align: center;
+}
+
+/*
+##############################################
+##############################################
+######                                  ######
+######          Add Book                ######
+######                                  ######
+##############################################
+##############################################
+*/
+section#add-book-for-user .buttons button {
+    display: block;
+    margin-inline: auto;
+    margin-block-end: 20px;
+    inline-size: 200px;
+    border-radius: 4px;
+    border-width: 1px;
+}
+
+section#add-book-for-user form {
+    display: flex;
+    flex-direction: row;
+    gap: 0px;
+}
+
+section#add-book-for-user form * {
+    font-size: 0.80rem;
+}
+
+/* Form Child: Image Preview */
+section#add-book-for-user form .image-preview {
+    text-align: center;
+    padding-inline-start: 5px;
+
+    /* Flex Parent */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    /* Flex Child */
+    flex: 1 1;
+}
+
+section#add-book-for-user form .image-preview h2 {
+    font-size: 1rem;
+}
+
+section#add-book-for-user form .image-preview img {
+    max-inline-size: none;
+    inline-size: 150px;
+    block-size: 200px;
+    object-fit: cover;
+}
+
+#image {
+    display: none;
+}
+
+.custom-file-upload {
+    border: 1px solid black;
+    display: block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #B8F4BC;
+    color: black;
+    inline-size: 150px;
+}
+
+.custom-file-upload:hover,
+.custom-file-upload:active {
+    background-color: #d5fdd8;
+    border-color: rgb(32, 32, 32);
+    color: rgb(32, 32, 32);
+}
+
+section#add-book-for-user form .image-preview button {
+    border-radius: 0px;
+    inline-size: 150px;
+    border-width: 1px;
+}
+
+/* Form Child: Form */
+section#add-book-for-user form .information {
+    text-align: center;
+
+    /* Flex Parent */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    /* Flex Child */
+    flex: 2 1;
+}
+
+section#add-book-for-user form .information input,
+section#add-book-for-user form .information textarea,
+section#add-book-for-user form .information button  {
+    display: block;
+    inline-size: 175px;
+    margin-inline: auto;
+}
+
+section#add-book-for-user form .information input,
+section#add-book-for-user form .information button  {
+    block-size: 30px;
+    padding-inline: 5px;
+}
+
+section#add-book-for-user form .information textarea {
+    min-block-size: 100px;
+    block-size: 150px;
+}
+
+section#add-book-for-user .feedback {
+    margin-block-start: 20px;
+    text-align: center;
+}
+
+
+/*
+##############################################
+##############################################
+######                                  ######
 ######          Media Queries           ######
 ######                                  ######
 ##############################################
@@ -757,6 +1100,95 @@ section#top-books > .retrieve-success img {
         grid-template-columns: repeat(3, 1fr);
     }
     /* Book List: End */
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######      View Book Instance          ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#view-a-book .book-instance-information > .records {
+        display: flex;
+        justify-content: center;
+    }
+
+    section#view-a-book .book-instance-information > .records  > .text-record {
+        text-align: center;
+    }
+
+    section#view-a-book .book-instance-information > .records.has-plot  > .text-record {
+        text-align: right;
+    }
+
+    section#view-a-book .book-instance-information > .records.has-plot img,  
+    section#view-a-book .book-instance-information > .records.has-plot .buttons {
+        align-self: end;
+    }
+
+    section#view-a-book .book-instance-information > .plot-description {
+        padding-inline: 10px;
+    }
+
+    section#view-a-book .book-instance-information > .plot-description p,
+    section#view-a-book .book-instance-information > .plot-description .attribute {
+        font-size: 0.95rem;
+        line-height: 1.8;
+        text-align: left;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######          Add Book                ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#add-book-for-user form {
+        gap: 20px;
+    }
+
+    section#add-book-for-user form * {
+        font-size: 0.85rem;
+    }
+
+    /* Form Child: Image Preview */
+    section#add-book-for-user form .image-preview {
+        padding-inline-start: 0px;
+
+        /* Flex Parent */
+        justify-content: center;
+        align-items: end;
+
+        /* Flex Child */
+        flex: 2 1;
+    }
+
+    /* Form Child: Form */
+    section#add-book-for-user form .information {
+        text-align: left;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information textarea,
+    section#add-book-for-user form .information button  {
+        inline-size: 200px;
+        margin-inline: 0;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information button  {
+        block-size: 35px;
+    }
+
+    section#add-book-for-user form .information textarea {
+        min-block-size: 150px;
+        block-size: 200px;
+    }
 }
 
 /* ≥ 768px — Tablet Vertical */
@@ -906,6 +1338,128 @@ section#top-books > .retrieve-success img {
         border: 1px solid black;
     }
 
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######      View Book Instance          ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#view-a-book .book-instance-information > .records {
+        display: flex;
+        justify-content: center;
+    }
+
+    section#view-a-book .book-instance-information > .records  > .text-record {
+        text-align: center;
+    }
+
+    section#view-a-book .book-instance-information > .records.has-plot  > .text-record {
+        text-align: right;
+    }
+
+    section#view-a-book .book-instance-information > .records.has-plot img,  
+    section#view-a-book .book-instance-information > .records.has-plot .buttons {
+        align-self: end;
+    }
+
+    section#view-a-book .book-instance-information > .plot-description {
+        padding-inline: 10px;
+    }
+
+    section#view-a-book .book-instance-information > .plot-description p,
+    section#view-a-book .book-instance-information > .plot-description .attribute {
+        font-size: 0.95rem;
+        line-height: 1.8;
+        text-align: left;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######           Book Notes             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    /* Note List: Start */
+    section#view-book-note .note-lists {
+        margin-inline: 60px;
+    }
+
+    section#view-book-note .note-lists > * {
+        margin-block-start: 20px;
+    }
+
+    section#view-book-note .buttons p {
+        padding-block: 10px;
+    }
+    /* Note List: End */
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######          Add Book                ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#add-book-for-user form {
+        gap: 20px;
+    }
+
+    section#add-book-for-user form * {
+        font-size: 0.91rem;
+    }
+
+    /* Form Child: Image Preview */
+    section#add-book-for-user form .image-preview {
+        padding-inline-start: 0px;
+        /* Flex Parent */
+        justify-content: center;
+        align-items: end;
+
+        /* Flex Child */
+        flex: 2 1;
+    }
+
+    section#add-book-for-user form .image-preview h2 {
+        font-size: 1.5rem;
+    }
+
+    section#add-book-for-user form .image-preview img {
+        max-inline-size: none;
+        inline-size: 150px;
+        block-size: 200px;
+        object-fit: cover;
+    }
+
+    /* Form Child: Form */
+    section#add-book-for-user form .information {
+        text-align: left;
+        gap: 22px;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information textarea,
+    section#add-book-for-user form .information button  {
+        inline-size: 250px;
+        margin-inline: 0;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information button  {
+        block-size: 35px;
+    }
+
+    section#add-book-for-user form .information textarea {
+        min-block-size: 150px;
+        block-size: 200px;
+    }
 }
 
 /* ≥ 1024px — Tablet Horizontal (also small laptops) */
@@ -1022,6 +1576,133 @@ section#top-books > .retrieve-success img {
     section#top-books > .retrieve-success {
         grid-template-columns: repeat(5, 1fr);
     }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######      View Book Instance          ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#view-a-book .book-instance-information > .records {
+        flex-direction: row;
+        column-gap: 10px;
+        row-gap: 0px;
+        justify-content: center;
+    }
+
+    /* When plot description is NON-NULL */
+    section#view-a-book .book-instance-information > .records.has-plot {
+        justify-content: end !important;
+    }
+
+    section#view-a-book .book-instance-information > .records > .image-record {
+        order: 2;
+        align-items: end;
+    }
+
+    section#view-a-book .book-instance-information > .records > .text-record {
+        align-items: end;
+        order: 1;
+        text-align: left;
+    }
+
+    section#view-a-book .book-instance-information > .records > .text-record .buttons {
+        margin-inline-start: auto;
+    }
+
+    section#view-a-book .book-instance-information > .plot-description {
+        padding-inline: 10px;
+    }
+
+    section#view-a-book .book-instance-information > .plot-description p,
+    section#view-a-book .book-instance-information > .plot-description .attribute {
+        font-size: 0.90rem;
+        text-align: left;
+        line-height: 2.0;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######           Book Notes             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    /* Note List: Start */
+    section#view-book-note .note-lists {
+        margin-inline: 80px;
+    }
+
+    section#view-book-note .note-lists > * {
+        margin-block-start: 20px;
+    }
+
+    section#view-book-note .buttons p {
+        padding-block: 10px;
+    }
+    /* Note List: End */
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######          Add Book                ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#add-book-for-user form {
+        gap: 20px;
+    }
+
+    section#add-book-for-user form * {
+        font-size: 0.95rem;
+    }
+
+    /* Form Child: Image Preview */
+    section#add-book-for-user form .image-preview {
+        /* Flex Parent */
+        justify-content: center;
+        align-items: end;
+    }
+
+    section#add-book-for-user form .image-preview h2 {
+        font-size: 1.6rem;
+    }
+
+    section#add-book-for-user form .image-preview img {
+        max-inline-size: none;
+        inline-size: 150px;
+        block-size: 200px;
+        object-fit: cover;
+    }
+
+    /* Form Child: Form */
+    section#add-book-for-user form .information {
+        text-align: left;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information textarea,
+    section#add-book-for-user form .information button  {
+        inline-size: 300px;
+        margin-inline: 0;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information button  {
+        block-size: 40px;
+    }
+
+    section#add-book-for-user form .information textarea {
+        min-block-size: 150px;
+        block-size: 200px;
+    }
 }
 
 /* ≥ 1920px — Desktop (Full HD and up) */
@@ -1116,5 +1797,77 @@ section#top-books > .retrieve-success img {
     section#top-books > .retrieve-success {
         grid-template-columns: repeat(5, 1fr);
         padding-inline: 15%;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######      View Book Instance          ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+
+    section#view-a-book .book-instance-information > .plot-description p {
+        text-align: left;
+        font-size: 0.98rem;
+        line-height: 1.8;
+    }
+
+    section#view-a-book {
+        margin-inline: 100px;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######           Book Notes             ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    /* Note List: Start */
+    section#view-book-note .note-lists {
+        margin-inline: 200px;
+    }
+
+    section#view-book-note .note-lists > * {
+        margin-block-start: 40px;
+    }
+
+    /*
+    ##############################################
+    ##############################################
+    ######                                  ######
+    ######          Add Book                ######
+    ######                                  ######
+    ##############################################
+    ##############################################
+    */
+    section#add-book-for-user form {
+        gap: 20px;
+    }
+
+    section#add-book-for-user form * {
+        font-size: 1rem;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information textarea,
+    section#add-book-for-user form .information button  {
+        inline-size: 350px;
+        margin-inline: 0;
+    }
+
+    section#add-book-for-user form .information input,
+    section#add-book-for-user form .information button  {
+        block-size: 40px;
+    }
+
+    section#add-book-for-user form .information textarea {
+        min-block-size: 200px;
+        block-size: 250px;
     }
 }

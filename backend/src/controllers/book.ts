@@ -355,6 +355,10 @@ export const rereadABook = async (req: Request, res: Response, next: NextFunctio
                 params: [book_id]
             },
             {
+                query: "UPDATE BOOK SET BOOK_TIMESTAMP = CURRENT_TIMESTAMP WHERE BOOK_ID = ?;",
+                params: [book_id]
+            },
+            {
                 query: "INSERT INTO ACTIVITY_LOG (ACCT_ID, LOG_TYPE, LOG_DESCRIPTION) VALUES (?, ?, ?);",
                 params: [userInformation.id, 'user', `User successfully reread the book ${book_title}`]
             },
@@ -564,7 +568,7 @@ export const updateNote = async (req: Request, res: Response, next: NextFunction
         console.log(`Updating note #${note_id} for ${userInformation.email}'s book ${name}`);
         transactionQuery = [
             {
-                query: "UPDATE NOTE SET NOTE_TITLE = ?, NOTE_CONTENT = ? WHERE NOTE_ID = ? AND BOOK_ID = ?;",
+                query: "UPDATE NOTE SET NOTE_TITLE = ?, NOTE_CONTENT = ?, NOTE_TIMESTAMP = CURRENT_TIMESTAMP WHERE NOTE_ID = ? AND BOOK_ID = ?;",
                 params: [title, content, note_id, book_id]
             },
             {
@@ -768,7 +772,7 @@ export const updateBook = async (req: Request, res: Response, next: NextFunction
         console.log(`Updating ${userInformation.email}'s book (${title}) to the database...`);
         transactionQuery = [
             {
-                query: 'UPDATE BOOK SET BOOK_TITLE = ?, BOOK_IMG = ?, BOOK_PLOT_DESC = ?, BOOK_DATE_RELEASE = ?, BOOK_DATE_END = ? WHERE ACCT_ID = ? AND BOOK_ID = ?;',
+                query: 'UPDATE BOOK SET BOOK_TITLE = ?, BOOK_IMG = ?, BOOK_PLOT_DESC = ?, BOOK_DATE_RELEASE = ?, BOOK_DATE_END = ?, BOOK_TIMESTAMP = CURRENT_TIMESTAMP WHERE ACCT_ID = ? AND BOOK_ID = ?;',
                 params: [title, image, plot_description, release_date, end_date, userInformation.id, book_id]
             },
             {
