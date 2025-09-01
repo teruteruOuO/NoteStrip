@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # Stacks
 root-user-stacks
+
+#Certification
+certifications/

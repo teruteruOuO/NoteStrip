@@ -60,7 +60,9 @@ export interface IDatabasePool {
 
 export interface ICorsOptions {
     origin: string,
-    credentials: boolean
+    credentials: boolean,
+    methods?: string[],          // optional list of allowed HTTP methods
+    allowedHeaders?: string[]    // optional list of allowed request headers
 }
 
 export interface ICookieToken {

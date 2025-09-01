@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Production Infrastructure for NoteStrip Application'
 Parameters:
+  # Database Password
   DBPassword:
     Type: String
     Description: "The master password for the NoteStrip RDS database"
@@ -10,9 +11,26 @@ Parameters:
     AllowedPattern: "^[a-zA-Z0-9@#$%^&+=]*$"     # Allows common special characters
     ConstraintDescription: "Password must be 8–41 characters and cannot contain '/', '@', '\"', or spaces."
     
+  # AMI ID
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+  # S3 Access Key ID
+  S3AccessKeyId:
+    Type: String
+    Description: "The AWS access key ID for accessing the S3 bucket"
+    NoEcho: true
+    MinLength: 16
+    MaxLength: 128
+
+  # S3 Secret Access Key
+  S3SecretAccessKey:
+    Type: String
+    Description: "The AWS secret access key for accessing the S3 bucket"
+    NoEcho: true
+    MinLength: 16
+    MaxLength: 128
 
 Resources:
   ##########################################################################
@@ -667,26 +685,11 @@ Resources:
               Service: ec2.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        # AWS managed policy for basic EC2 access to CloudWatch (logs, metrics)
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-        # Policy for PM2 to publish logs directly to CloudWatch
-        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-      Policies:
-        - PolicyName: NoteStripS3AccessPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:ListBucket
-                  - s3:GetObject
-                  - s3:PutObject
-                  - s3:DeleteObject
-                Resource:
-                  - !Sub arn:aws:s3:::notestrip-storage-bucket
-                  - !Sub arn:aws:s3:::notestrip-storage-bucket/*
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy    # AWS managed policy for basic EC2 access to CloudWatch (logs, metrics)
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess       # Policy for PM2 to publish logs directly to CloudWatch
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore   # Allow to enter one of the EC2 instances
 
-  # Instance Profile to attach Role to EC2
+  # Instance Profile to attach Role to EC2; attached to EC2IAMRole  
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -694,7 +697,7 @@ Resources:
       Roles:
         - !Ref EC2IAMRole
   
-  # IAM Policy for CloudWatch Logs  
+  # IAM Policy for CloudWatch Logs; attached to EC2IAMRole  
   EC2CloudWatchLogsPolicy:
     Type: AWS::IAM::Policy
     Properties:
@@ -710,46 +713,6 @@ Resources:
               - logs:CreateLogStream        # Allow creating log streams
               - logs:PutLogEvents           # Allow pushing log events
             Resource: "*"
-
-  ##########################################################################
-  #                                                                        #
-  #                     S3 Bucket                                          #
-  #                                                                        #
-  ##########################################################################
-  # REMINDER: Make a stack for S3 Bucket alone and upload notestrip.zip file there first 
-  # S3 Bucket for storing application files
-  NoteStripS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: notestrip-storage-bucket  # Gives the bucket a fixed name (must be globally unique)
-      AccessControl: Private                # Ensures default permissions are private (not publicly readable)
-      PublicAccessBlockConfiguration:       # Blocks all public access to the bucket for extra security
-        BlockPublicAcls: true                # Prevents adding new public ACLs
-        BlockPublicPolicy: true              # Prevents bucket policies that would make data public
-        IgnorePublicAcls: true               # Ignores any existing public ACLs
-        RestrictPublicBuckets: true          # Restricts access if public policies are accidentally applied
-      VersioningConfiguration:
-        Status: Suspended                       # Disabled: Keeps multiple versions of objects (for recovery and history)
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:   # Enforces encryption for all objects stored in the bucket
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256           # Uses AES-256 encryption for strong data security
-
-  # Bucket policies for NoteStripS3Bucket
-  # This means any entity assuming the EC2 role can access the bucket from anywhere, not just from inside the VPC.
-  NoteStripS3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref NoteStripS3Bucket          # The bucket to which this policy will be attached
-      PolicyDocument:
-        Version: "2012-10-17"                 # Policy language version
-        Statement:
-          # Allow CloudWatch Logs to write exported logs
-          - Effect: Allow
-            Principal:
-              Service: logs.amazonaws.com
-            Action: s3:PutObject
-            Resource: !Sub arn:aws:s3:::${NoteStripS3Bucket}/AWSLogs/${AWS::AccountId}/*
 
   ##########################################################################
   #                                                                        #
@@ -964,5 +927,16 @@ Resources:
   NoteStripLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: /notestrip/app/logs     # Log group name
+      LogGroupName: /logs     # Log group name
       RetentionInDays: 14                   # Keep logs for 14 days
+
+Outputs:
+  # RDS Endpoint
+  DBHost:
+    Description: "RDS MySQL endpoint hostname"
+    Value: !GetAtt NoteStripRDSInstance.Endpoint.Address
+
+  # RDS Port
+  DBPort:
+    Description: "RDS MySQL port"
+    Value: !GetAtt NoteStripRDSInstance.Endpoint.Port

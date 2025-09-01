@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'S3 Production Infrastructure For NoteStrip'
+
+Resources:
+  # S3 bucket (private)
+  NoteStripS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: notestrip-application
+      AccessControl: Private
+      # Block all public access (bucket-level)
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins: ["*"]
+            AllowedMethods: ["GET", "HEAD", "PUT", "DELETE"]
+            AllowedHeaders: ["*"]
+            ExposedHeaders: ["ETag", "x-amz-request-id"]  # <-- correct property name
+            MaxAge: 3000
+      Tags:
+        - Key: Name
+          Value: notestrip-application-s3
+
+  # Bucket policy to enforce TLS; Attached to the bucket
+  NoteStripS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref NoteStripS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: EnforceTLS
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${NoteStripS3Bucket.Arn}"
+              - !Sub "${NoteStripS3Bucket.Arn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  # IAM user for accessing the bucket
+  NoteStripIAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: user-with-s3-notestrip-access
+      Tags:
+        - Key: Name
+          Value: user-with-s3-notestrip-access
+
+  # IAM policy attached to user for bucket access
+  NoteStripIAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: NoteStripS3AccessPolicy
+      Users:
+        - !Ref NoteStripIAMUser
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Sub "arn:aws:s3:::notestrip-application"
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub "arn:aws:s3:::notestrip-application/*"
+
+  # Create access key for the IAM user
+  NoteStripIAMAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref NoteStripIAMUser
+
+Outputs:
+  S3BucketName:
+    Description: "Name of the S3 bucket"
+    Value: !Ref NoteStripS3Bucket
+
+  IAMAccessKeyId:
+    Description: "Access Key ID for the S3 IAM user"
+    Value: !Ref NoteStripIAMAccessKey
+    Export:
+      Name: NoteStripAccessKeyId
+
+  IAMSecretAccessKey:
+    Description: "Secret Access Key for the S3 IAM user (only visible at stack creation)"
+    Value: !GetAtt NoteStripIAMAccessKey.SecretAccessKey
+    Export:
+      Name: NoteStripSecretAccessKey
+
+# What this does:
+#   Creates private S3 bucket with CORS for web access.
+#   Blocks all public access.
+#   Creates IAM user just for this bucket.
+#   Attaches least-privilege policy to that user.
+#   Creates an Access Key and Secret Key for programmatic access (only shown once after stack creation in CloudFormation outputs).

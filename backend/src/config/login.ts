@@ -19,7 +19,9 @@ export class LoginConfiguration {
     // Returns this instance's mail options
     public getLoginOptions(): ICookieToken {
         let option: ICookieToken = process.env.NODE_ENVIRONMENT === "production"
+        // Production: Same Site
         ? { httpOnly: true, secure: true, sameSite: 'none', maxAge: this.maxAge }
+        // Development
         : { httpOnly: true, secure: false, sameSite: 'lax', maxAge: this.maxAge }
 
         return option;
