@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authorizeToken } from '@/helpers/authorize-token';
 import HomeView from '../views/HomeView.vue'
+import { useUserStore } from '@/stores/user';
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
@@ -96,20 +97,32 @@ const router = createRouter({
 
 // This is triggered each time a user navigates from page to page
 router.beforeEach(async (to, from, next) => {
-    const isValid = await authorizeToken(to.name, to.meta.requiresAuth ? true : false);
+	const requiresAuth = !!to.meta.requiresAuth;
+	const userStore = useUserStore();
 
-	// Restrict access to edit-book unless coming from view-book
-    if (to.name === 'edit-book' && from.name !== 'view-book') {
-		window.history.back(); // navigates back to previous history entry
-		return;
-    }
+	// Check Pinia first for logged-in state
+	const alreadyLoggedIn = !!userStore.user?.id;
 
-    if (isValid) {
-		next();
-	} else {
-		next({ name: 'login'});
+	// Redirect logged-in users away from auth pages
+	if (['login', 'sign-up', 'password-recovery'].includes(to.name) && alreadyLoggedIn) {
+		return next({ name: 'dashboard' });
 	}
-    
+
+	//  For protected routes, still verify the token with the server
+	if (requiresAuth) {
+		const isValid = await authorizeToken(to.name, true);
+		if (!isValid) {
+			return next({ name: 'login' });
+		}
+	}
+
+	// Restrict direct access to edit-book unless coming from view-book
+	if (to.name === 'edit-book' && from.name !== 'view-book') {
+		window.history.back();
+		return;
+	}
+
+	next();
 });
 
 
