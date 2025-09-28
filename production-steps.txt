@@ -2,3 +2,6 @@
     - Make a copy of Notestrip Application
     - Replace the current values of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in backend/.env with the stack's output
 2. Zip this copy of Notestrip Application and upload to the newly made S3 store.
+3. Upload Production.yaml file to CloudFormation
+    - Write the DB, Access, and Secret Key as parameters for this stack
+4. After a successful upload, log in to one of the EC2s to create the table

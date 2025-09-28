@@ -795,10 +795,78 @@ Resources:
           #!/bin/bash
           set -e
 
+          # Update packages
           yum update -y
 
+          # Install Node.js, unzip, nginx, aws-cli
           curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
           yum install -y nodejs unzip nginx aws-cli
+
+          # Create application directory
+          mkdir -p /opt/NoteStrip
+
+          # Download application zip from S3
+          aws s3 cp s3://notestrip-storage-bucket/NoteStrip.zip /tmp/NoteStrip.zip
+          unzip -o /tmp/NoteStrip.zip -d /opt/
+
+          # Install backend dependencies
+          cd /opt/NoteStrip/backend
+          npm install --production
+
+          # Install frontend dependencies and build
+          cd /opt/NoteStrip/frontend
+          npm install
+          npm run build
+
+          # Configure nginx to serve frontend and proxy API
+          cat > /etc/nginx/conf.d/notestrip.conf << 'EOF'
+          server {
+              listen 80;
+
+              location /api/ {
+                  proxy_pass http://localhost:5000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host $host;
+                  proxy_cache_bypass $http_upgrade;
+              }
+
+              location / {
+                  root /opt/NoteStrip/frontend/dist;
+                  index index.html;
+                  try_files $uri /index.html;
+              }
+          }
+          EOF
+
+          rm -f /etc/nginx/conf.d/default.conf || true
+
+          # Enable and start nginx
+          systemctl enable nginx
+          systemctl restart nginx
+
+          # Install PM2 globally
+          npm install -g pm2
+
+          # Install PM2 CloudWatch module
+          npm install -g pm2-cloudwatch
+
+          # Set PM2 CloudWatch configuration
+          pm2 set pm2-cloudwatch:logGroupName "/notestrip/app/logs"
+          pm2 set pm2-cloudwatch:logStreamName "backend"
+          pm2 set pm2-cloudwatch:region "${AWS::Region}"
+
+          # Start PM2 CloudWatch module
+          pm2 module:install pm2-cloudwatch
+
+          # Start backend app under PM2
+          cd /opt/NoteStrip/backend
+          pm2 start npm --name "notestrip-backend" -- run backend-prod
+
+          # Save PM2 process list and enable startup
+          pm2 save
+          pm2 startup systemd -u ec2-user --hp /home/ec2-user
         BlockDeviceMappings:
           - DeviceName: /dev/xvda             # Root volume device name
             Ebs:
@@ -869,6 +937,20 @@ Resources:
           Value: NoteStripAppServer
           PropagateAtLaunch: true                        # Ensures the tag is applied to new instances
 
+  # Auto Scaling Policy
+  # Keep the average CPU of all instances near 50%     
+  # If traffic spikes → CPU goes above 50% → ASG launches another EC2 (up to MaxSize: 2 in your stack).
+  #If traffic drops → CPU goes below 50% → ASG terminates an instance (but never below MinSize: 1).                           
+  NoteStripScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref NoteStripAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 50.0   # Keep average CPU around 50%
+
   ##########################################################################
   #                                                                        #
   #                     Application Load Balancer (ALB)                    #
@@ -918,6 +1000,35 @@ Resources:
   # Flow Summary
   # User hits ALB → Listener receives HTTP request → ALB checks Target Group for healthy EC2 → Sends traffic to one of the EC2 servers →
   # Auto Scaling Group manages adding/removing EC2 servers using the Launch Template → Every new EC2 is automatically put into the Target Group.
+
+  ##########################################################################
+  #                                                                        #
+  #                     CloudWatch Alarms                                  #
+  #                                                                        #
+  ##########################################################################
+  # Creates an SNS topic.
+  NoteStripAlarmTopic:
+    Type: AWS::SNS::Topic                 # When an alarm triggers, CloudWatch sends a message to this topic.
+    Properties:                           # Subscribe an email or SMS to this topic (outside this YAML, in AWS Console or another resource). Then, if the alarm fires, get an email/SMS.
+      DisplayName: NoteStripAlarmTopic    # In the AWS Console → SNS → Subscriptions, add email and confirm it.
+
+  # This monitors the average CPU usage of EC2 instances (via the Auto Scaling Group). If it stays too high, the alarm fires.
+  EC2HighCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alarm if EC2 CPU > 80% for 5 minutes"
+      Namespace: AWS/EC2                                                # Tells CloudWatch to look at EC2 metrics.
+      MetricName: CPUUtilization                                        # the specific metric (CPU usage in %).
+      Dimensions:                                                       # Here it filters by the Auto Scaling Group name, so it only tracks the EC2 instances managed by ASG.
+        - Name: AutoScalingGroupName
+          Value: !Ref NoteStripAutoScalingGroup
+      Statistic: Average                                                # looks at the average CPU value.
+      Period: 300                                                       # Each data point is a 5-minute window (300 seconds).
+      EvaluationPeriods: 1                                              # it only needs one period over the threshold to trigger (so, 5 minutes straight of high CPU).
+      Threshold: 80                                                     # the alarm triggers if CPU > 80%.
+      ComparisonOperator: GreaterThanThreshold                          # trigger if CPU is greater than 80
+      AlarmActions:
+        - !Ref NoteStripAlarmTopic
 
   ##########################################################################
   #                                                                        #

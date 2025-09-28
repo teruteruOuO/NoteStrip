@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'S3 Production Infrastructure For NoteStrip'
+Description: "NoteStrip's S3. Only the user created here has access to this bucket."
 
 Resources:
   # S3 bucket (private)
@@ -7,20 +7,19 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: notestrip-application
-      AccessControl: Private
-      # Block all public access (bucket-level)
-      PublicAccessBlockConfiguration:
+      AccessControl: Private                      # By default, everything is private
+      PublicAccessBlockConfiguration:             # Explicitly blocks any kind of public access (this prevents accidents like making the bucket world-readable).
         BlockPublicAcls: true
         IgnorePublicAcls: true
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
-      CorsConfiguration:
-        CorsRules:
-          - AllowedOrigins: ["*"]
-            AllowedMethods: ["GET", "HEAD", "PUT", "DELETE"]
-            AllowedHeaders: ["*"]
-            ExposedHeaders: ["ETag", "x-amz-request-id"]  # <-- correct property name
-            MaxAge: 3000
+      CorsConfiguration:                                      # Defines CORS rules (Cross-Origin Resource Sharing).
+        CorsRules:                                                                      
+          - AllowedOrigins: ["*"]                             # Any origin (*) can interact with this bucket.  
+            AllowedMethods: ["GET", "HEAD", "PUT", "DELETE"]  # Allows GET, HEAD, PUT, DELETE.
+            AllowedHeaders: ["*"]                             # Allows all request headers.
+            ExposedHeaders: ["ETag", "x-amz-request-id"]      # Explicitly exposes certain response headers (ETag, x-amz-request-id) to the browser.
+            MaxAge: 3000                                      # How long the browser caches the preflight response (3000 seconds).
       Tags:
         - Key: Name
           Value: notestrip-application-s3
@@ -29,18 +28,18 @@ Resources:
   NoteStripS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref NoteStripS3Bucket
-      PolicyDocument:
+      Bucket: !Ref NoteStripS3Bucket                  # Refers to the bucket created above.
+      PolicyDocument:                                 
         Version: "2012-10-17"
         Statement:
-          - Sid: EnforceTLS
-            Effect: Deny
-            Principal: "*"
-            Action: "s3:*"
-            Resource:
+          - Sid: EnforceTLS                           # This policy denies all requests over plain HTTP.
+            Effect: Deny  
+            Principal: "*"                            # applies to everyone.
+            Action: "s3:*"                            # all S3 actions
+            Resource:                                 # the bucket itself and all objects inside it
               - !Sub "${NoteStripS3Bucket.Arn}"
               - !Sub "${NoteStripS3Bucket.Arn}/*"
-            Condition:
+            Condition:                                # If aws:SecureTransport is false (meaning not using HTTPS/TLS), the request is denied.
               Bool:
                 aws:SecureTransport: "false"
 
@@ -63,18 +62,18 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
+          - Effect: Allow                                               # Lets the user see the list of objects (but not download them yet).
             Action:
               - s3:ListBucket
             Resource: !Sub "arn:aws:s3:::notestrip-application"
-          - Effect: Allow
+          - Effect: Allow                                               # Lets the user download, upload, and delete files.
             Action:
               - s3:GetObject
               - s3:PutObject
               - s3:DeleteObject
             Resource: !Sub "arn:aws:s3:::notestrip-application/*"
 
-  # Create access key for the IAM user
+  # Generates an access key pair (AccessKeyId + SecretAccessKey) for the IAM user.
   NoteStripIAMAccessKey:
     Type: AWS::IAM::AccessKey
     Properties:
