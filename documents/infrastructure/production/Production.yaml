@@ -696,23 +696,6 @@ Resources:
       InstanceProfileName: NoteStripEC2InstanceProfile
       Roles:
         - !Ref EC2IAMRole
-  
-  # IAM Policy for CloudWatch Logs; attached to EC2IAMRole  
-  EC2CloudWatchLogsPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: NoteStripCloudWatchLogsPolicy
-      Roles:
-        - !Ref EC2IAMRole                   # Attach to EC2 IAM Role
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - logs:CreateLogGroup         # Allow creating new log groups
-              - logs:CreateLogStream        # Allow creating log streams
-              - logs:PutLogEvents           # Allow pushing log events
-            Resource: "*"
 
   ##########################################################################
   #                                                                        #
